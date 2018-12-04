@@ -1,6 +1,8 @@
-# demo
+# front-end of HLS-II Data System
 
-> A Vue.js project
+> A front-end project consisting of Vue.js and Element-ui
+
+
 
 ## Build Setup
 
