@@ -1,5 +1,5 @@
 <template>
-  <div id="cont">
+  <div id="cont" style="min-width: 1200px">
      <el-row style="background-color: #ffffff; height:60px; " :gutter="20" type="flex">
       <el-col :span="24" align="center">
         <p class="grid-content bg-purple-dark" style="font-size: xx-large; margin-top: 10px;" >HLS-Ⅱ {{this.$route.name}}</p>
@@ -8,16 +8,15 @@
     <el-row>
           <el-menu :default-active="$route.path" class="el-menu-demo" mode="horizontal" @select="handleSelect" background-color="#2d6ba9"
                    text-color="#ffffff"
-                   active-text-color="#ffd04b"
-          >
-            <el-col :span="3" :offset="3">
+                   active-text-color="#ffd04b">
+            <el-col :offset="3" :span="3">
               <el-menu-item index="1" align="center"><router-link class="routernav" STYLE="text-decoration:none" to="/home">Home</router-link></el-menu-item>
-            </el-col>
-            <el-col :span="3" >
+              </el-col>
+            <el-col :span="3">
               <el-submenu index="2" align="center">
                 <template slot="title">Historical Data</template>
                 <el-menu-item index="2-1"><router-link to="/history/normalquery" style="text-decoration: none">Standard Query</router-link></el-menu-item>
-                <el-menu-item index="2-2"><router-link to="" style="text-decoration: none">User-defined Query</router-link></el-menu-item>
+                <el-menu-item index="2-2"><router-link to="/history/userdefinedquery" style="text-decoration: none">User-defined Query</router-link></el-menu-item>
                 <el-menu-item index="2-3"><router-link to="/history/filerecords" style="text-decoration: none">Record Files</router-link></el-menu-item>
               </el-submenu>
             </el-col>
@@ -104,9 +103,9 @@
     font-size: large;
     margin-bottom: fill;
   }
-  html,#cont{
-    height: 100%;
-  }
+  /*html,#cont{*/
+    /*height: 100%;*/
+  /*}*/
   body{
     height: 100%;
   }

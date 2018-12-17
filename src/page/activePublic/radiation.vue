@@ -9,28 +9,30 @@
     </el-dialog>
     <el-row>
       <el-col :span="11" offset="2" >
+        <div style="width: 100%">
         <el-table :data = "gridData1" border :show-header="showHeader" style="width: 80%; margin-left: auto; margin-right: auto;
         margin-top: 10px;" row-style="height:0"  cell-style="padding:5px">
           <el-table-column property="pv" label = '' align="center"></el-table-column>
           <el-table-column property="value" label = '' align="center"></el-table-column>
         </el-table>
+        </div>
 
         <el-table :data="gridData" border row-class-name="table_class" style="font-size: small; width: 80%; margin-left: auto;
         margin-right: auto;margin-top: 20px;" row-style="height:0"
-                  cell-style="padding:0" :header-cell-style="tableHeaderColor">>>
-          <el-table-column property="pv" label="" align="center"></el-table-column>
-          <el-table-column property="Gamma" label="Gamma(nSv/h)" align="center" width="140"></el-table-column>
-          <el-table-column property="Neutron" label="Neutron(nGr/h)" align="center" width="140"></el-table-column>
-          <el-table-column label="History" align="center">
-            <template slot-scope="scope">
-              <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+                             cell-style="padding:0" :header-cell-style="tableHeaderColor">
+        <el-table-column property="pv" label="" align="center"></el-table-column>
+        <el-table-column property="Gamma" label="Gamma(nSv/h)" align="center" width="140"></el-table-column>
+        <el-table-column property="Neutron" label="Neutron(nGr/h)" align="center" width="140"></el-table-column>
+        <el-table-column label="History" align="center">
+          <template slot-scope="scope">
+            <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
       </el-col>
       <el-col :span="11" align="left" style="margin-top: 50px">
         <div>
-          <img src="../../assets/OPI_BG1.jpg" width="70%" height="70%"/>
+          <img src="../../assets/OPI_BG1.png" width="70%" height="70%"/>
         </div>
       </el-col>
     </el-row>
@@ -42,6 +44,7 @@
         name: "radiation",
         data(){
           return{
+
             Loading:false,
 
             websock: null,
@@ -96,7 +99,13 @@
                 type: 'linear',
                 title: {
                   text: 'Gamma(nSV/h)'
-                }
+                },
+                plotLines:[{
+                  color:'red',           //线的颜色，定义为红色
+                  dashStyle:'solid',     //默认值，这里定义为实线
+                  value:150,               //定义在那个值上显示标示线，这里是在x轴上刻度为3的值处垂直化一条线
+                  width:2                //标示线的宽度，2px
+                }]
               },{
                 opposite:true,
                 type: 'linear',
@@ -145,7 +154,7 @@
         mounted(){
           let _this = this;
           this.gridData = [];
-          this.$axios.get("/data/dmlist")
+          this.$axios.get("/dmlist")
             .then(function (response) {
               console.log(response.data)
               for (let i = 0; i < response.data.length; i++){
@@ -163,14 +172,14 @@
             if (rowIndex === 0) {
               return 'background-color: #ffffff;color: #000000;font-weight: 500;'
             }
-            return 'color: #000000; font-weight: 500'
+            return 'color: #000000; font-weight: 500; '
           },
 
           initWebpack:function () {
             let str = window.location.href;
             // console.log(str.split("/")[2])
-            const wsuri = "ws://"+ str.split("/")[2] + "/ws/radiation";
-            // const wsuri = "ws://"+ '192.168.113.35:80' + "/ws/radiation";
+            // const wsuri = "ws://"+ str.split("/")[2] + "/ws/radiation";
+            const wsuri = "ws://"+ '127.0.0.1:8081' + "/radiation";
             this.websock = new WebSocket(wsuri);//这里面的this都指向vue
 
             this.websock.onopen = this.websocketopen;
@@ -222,7 +231,7 @@
             console.log(a.pv);
             let dm = a.pv.substr(2,2);
             // console.log(dm)
-            this.$axios.get('/data/history/puredata/name/SR-DM-G'+ dm + ':ai/'+time2 + '/'+ time1)
+            this.$axios.get('/history/puredata/name/SR-DM-G'+ dm + ':ai/'+time2 + '/'+ time1)
               .then(function (response) {
                 // console.log(response.data.length)
                 // console.log("length:" + response.data.length)
@@ -235,7 +244,7 @@
                   _this.Loading = false;
                 }
               });
-            this.$axios.get('/data/history/puredata/name/SR-DM-N'+ dm + ':ai/'+time2 + '/'+ time1)
+            this.$axios.get('/history/puredata/name/SR-DM-N'+ dm + ':ai/'+time2 + '/'+ time1)
               .then(function (response) {
                 // console.log(response.data)
                 // console.log("length:" + response.data.length)

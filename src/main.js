@@ -18,8 +18,11 @@ import loadExporting from 'highcharts/modules/exporting';
 import promise from 'es6-promise';
 import 'lib-flexible/flexible.js'
 
+import VCharts from 'v-charts'
+
 loadExporting(Highcharts);
 
+Vue.use(VCharts)
 Vue.use(VueHighCharts, { Highcharts});
 
 promise.polyfill();
@@ -46,7 +49,8 @@ Highcharts.setOptions({
 })
 
 axios.defaults.timeout = '50000000'
-axios.defaults.baseURL="http://192.168.113.35:80"
+// axios.defaults.baseURL="http://192.168.113.35:80"
+axios.defaults.baseURL="http://222.195.82.88:8081"
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
 
 Date.prototype.format = function(fmt) {

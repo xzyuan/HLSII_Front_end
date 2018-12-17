@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <div style=" margin-bottom: auto; margin-top: auto; width: 70px">
-        <ve-pie :data="chartData" :settings="chartSettings" :legend-visible="legendVisible"></ve-pie>
+  <div align="center">
+    <div style="width: 50%;" align="center">
+      <ve-pie :data="chartData" :settings="chartSettings" :legend-visible="legendVisible" style="align:center;"></ve-pie>
     </div>
     <div style="width: 30%; margin-right: auto; margin-left: auto">
         <el-table
@@ -27,13 +27,13 @@
     </div>
   </div>
 </template>
+
 <script>
     export default {
         name: "piecharts",
         data(){
           this.chartSettings = {
             // dataType: 'percent'
-
           }
           return{
             legendVisible: false,
@@ -96,7 +96,7 @@
             let time2 = date2.format("yyyy-MM-dd hh:mm:ss");
             let startTime, endTime;
             let status = ["ShutDown", "Setup", "Injection", "Operation"]
-            this.$axios.get('/data/history/id/1522/' + time2 + '/' + time1)
+            this.$axios.get('/history/id/1522/' + time2 + '/' + time1)
               .then(function (response) {
                 n = response.data.length;
                 console.log(response.data)
