@@ -1,38 +1,105 @@
 <template>
   <div id="div1">
-    <el-dialog :visible.sync="dialogTableVisible" width="60%" v-loading="Loading" element-loading-text="Loading"
+    <el-dialog :visible.sync="dialogTableVisible" width="80%" element-loading-text="Loading"
                element-loading-spinner="el-icon-loading"
-               element-loading-background="rgba(255, 255, 255, 0)">
-      <el-main>
-        <highstock :options = 'options' style="width: 100%"></highstock>
+               element-loading-background="rgba(255, 255, 255, 0)"
+                style="height: 1000px;">
+      <el-main v-loading="Loading">
+        <div style="height:400px;min-width:300px">
+          <highstock :options = 'options' style="height:100%;width: 100%"></highstock>
+        </div>
+        <el-switch
+          active-color="#0055fa"
+          inactive-color="#696969"
+          active-text="Beam Current"
+          v-model="switchValue1"
+          @change="addBeamCurrSeries">
+        </el-switch>
+        <el-switch
+          active-color="#0055fa"
+          inactive-color="#696969"
+          active-text="Autosize"
+          v-model="switchValue2"
+          @change="changeMode">
+        </el-switch>
       </el-main>
     </el-dialog>
     <el-row>
       <el-col :span="11" offset="2" >
         <div style="width: 100%">
-        <el-table :data = "gridData1" border :show-header="showHeader" style="width: 80%; margin-left: auto; margin-right: auto;
-        margin-top: 10px;" row-style="height:0"  cell-style="padding:5px">
-          <el-table-column property="pv" label = '' align="center"></el-table-column>
-          <el-table-column property="value" label = '' align="center"></el-table-column>
-        </el-table>
+          <el-table :data = "gridData1" border :show-header="showHeader" style="width: 80%; margin-left: auto; margin-right: auto;
+            margin-top: 10px;" row-style="height:0"  cell-style="padding:5px" :hidden="true">
+            <el-table-column property="pv" label = '' align="center"></el-table-column>
+            <el-table-column property="value" label = '' align="center"></el-table-column>
+          </el-table>
+
+          <div align="center" style="margin-top: 15px;margin-bottom: 15px;">
+            <table width="80%" align="center">
+              <tr>
+                <td align="right" width="25%"><font
+                  style="color: #004499; font-size: 20px;"> Operation mode:</font></td>
+                <td align="left" width="25%"><font
+                  style="color: #8A2BE2; font-size: 20px;">{{status.operationMode}}</font></td>
+                <td align="right" width="25%"><font
+                  style="color: #004499; font-size: 20px;"> Operation status:</font></td>
+                <td align="left" width="25%"><font
+                  style="color: #8A2BE2; font-size: 20px;">{{status.operationStatus}}</font></td>
+              </tr>
+              <tr>
+                <td align="right" width="25%"><font
+                  style="color: #004499; font-size: 20px;"> Beam current:</font></td>
+                <td align="left" width="25%"><font
+                  style="color: #8A2BE2; font-size: 20px;">{{status.beamCurrent}}</font></td>
+                <td align="right" width="25%"><font
+                  style="color: #004499; font-size: 20px;"> Lifetime:</font></td>
+                <td align="left" width="25%"><font
+                  style="color: #8A2BE2; font-size: 20px;">{{status.lifetime}}</font></td>
+              </tr>
+              <tr>
+                <td align="right" width="25%" ><font
+                  style="color: #004499; font-size: 20px;"> Energy:</font></td>
+                <td align="left" width="25%" ><font
+                  style="color: #8A2BE2; font-size: 20px;">{{status.energy}}</font></td>
+              </tr>
+            </table>
+          </div>
+
+
         </div>
 
         <el-table :data="gridData" border row-class-name="table_class" style="font-size: small; width: 80%; margin-left: auto;
         margin-right: auto;margin-top: 20px;" row-style="height:0"
-                             cell-style="padding:0" :header-cell-style="tableHeaderColor">
+                             cell-style="padding:0" :header-cell-style="tableHeaderColor" :hidden="true">
         <el-table-column property="pv" label="" align="center"></el-table-column>
-        <el-table-column property="Gamma" label="Gamma(nSv/h)" align="center" width="140"></el-table-column>
-        <el-table-column property="Neutron" label="Neutron(nGr/h)" align="center" width="140"></el-table-column>
-        <el-table-column label="History" align="center">
+        <el-table-column property="Gamma" label="Gamma(μSv/h)" align="center" width="140"></el-table-column>
+        <el-table-column property="Neutron" label="Neutron(μGr/h)" align="center" width="140"></el-table-column>
+        <el-table-column label="Latest 24 hrs data" align="center" width="140">
           <template slot-scope="scope">
             <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
           </template>
         </el-table-column>
       </el-table>
+        <table border="1px" cellspacing="0px" align=center
+               bordercolor="#000000" style="margin-top: 30px;">
+          <tr>
+            <td align="center"><font size="4" color="#000000">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td>
+            <td align="center"><font size="4" color="#000000">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;Gamma(μSv/h)&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</font></td>
+            <td align="center"><font size="4" color="#000000">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;Neutron(μGr/h)&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</font></td>
+            <td align="center"><font size="4" color="#000000"> &nbsp; &nbsp;&nbsp;Latest 24 hrs data&nbsp; &nbsp; &nbsp;</font></td>
+          </tr>
+          <tr v-for="item in gridData">
+            <td align="center"><font size="3">{{item.pv}}</font></td>
+            <td align="center"><font size="3">{{item.Gamma}}</font></td>
+            <td align="center"><font size="3">{{item.Neutron}}</font></td>
+            <td align="center">
+                <el-button @click="handleClick(item)" type="text" size="small">查看</el-button>
+            </td>
+          </tr>
+        </table>
       </el-col>
       <el-col :span="11" align="left" style="margin-top: 50px">
-        <div>
-          <img src="../../assets/OPI_BG1.png" width="70%" height="70%"/>
+        <div style="margin-left: 40px;">
+          <img src="../../assets/OPI_BG1.png" width="550px" height="70%"/>
         </div>
       </el-col>
     </el-row>
@@ -44,6 +111,17 @@
         name: "radiation",
         data(){
           return{
+            status:{
+              operationMode:"",
+              beamCurrent:"",
+              lifetime:"",
+              operationStatus:"",
+              energy:""
+            },
+
+
+            switchValue1:false,
+            switchValue2:false,
 
             Loading:false,
 
@@ -78,6 +156,16 @@
                   relativeTo: 'chart'
                 }
               },
+              plotOptions: {
+                series:{
+                  turboThreshold:10000
+                },
+                line: {
+                  dataGrouping: {
+                    enabled: false
+                  }
+                }
+              },
               title: {
                 text: ''
               },
@@ -95,24 +183,38 @@
                 }
               },
               yAxis: [{
+                showFirstLabel: true,
+                showLastLabel: true,
                 opposite:false,
                 type: 'linear',
                 title: {
-                  text: 'Gamma(nSV/h)'
+                  text: 'Gamma(μSV/h)'
                 },
-                plotLines:[{
-                  color:'red',           //线的颜色，定义为红色
-                  dashStyle:'solid',     //默认值，这里定义为实线
-                  value:150,               //定义在那个值上显示标示线，这里是在x轴上刻度为3的值处垂直化一条线
-                  width:2                //标示线的宽度，2px
-                }]
+                softMax:2,
+                // softMin:0,
+                // softMax:0.170,
+                labels: {
+                  formatter: function () {
+                    return parseFloat(this.value).toFixed(3);
+                  }
+                },
+                lineWidth:1
               },{
+                showFirstLabel: true,
+                showLastLabel: true,
                 opposite:true,
                 type: 'linear',
                 title: {
-                  text: 'Neutron(nGr/h)'
-                }
-              }],
+                  text: 'Neutron(μGr/h)'
+                },
+                softMax:2,
+                labels: {
+                  formatter: function () {
+                    return parseFloat(this.value).toFixed(3);
+                  }
+                },
+                lineWidth:1
+              },],
               tooltip: {
                 dateTimeLabelFormats: {
                   millisecond: '%H:%M:%S.%L',
@@ -138,12 +240,12 @@
                 align: 'middle'
               },
               series:[{
-                name:'Gamma(nSV/h)',
+                name:'Gamma(μSV/h)',
                 data:[],
                 yAxis:0,
                 lineWidth:2
               },{
-                name:'Neutron(nGr/h)',
+                name:'Neutron(μGr/h)',
                 data:[],
                 yAxis:1,
                 lineWidth:2
@@ -154,7 +256,7 @@
         mounted(){
           let _this = this;
           this.gridData = [];
-          this.$axios.get("/dmlist")
+          this.$axios.get(this.urlFragment + "/dmlist")
             .then(function (response) {
               console.log(response.data)
               for (let i = 0; i < response.data.length; i++){
@@ -168,89 +270,183 @@
           this.initWebpack();
         },
         methods:{
+          addBeamCurrSeries:function () {
+            if(this.switchValue1 === true){
+              this.Loading = true;
+              let _this = this;
+              let p = [];
+              let date1 = new Date(Date.now());
+              let date2 = new Date(Date.now()-3600*24*1000);
+              console.log(date1);
+              let time1 = date1.format("yyyy-MM-dd hh:mm:ss");
+              let time2 = date2.format("yyyy-MM-dd hh:mm:ss");
+              this.$axios
+                .get(this.urlFragment + '/history/id/149/' + time2 + '/' + time1)
+                .then(function (response) {
+                  console.log(response.data)
+                  _this.options.yAxis.push({
+                    opposite:true,
+                    type: 'linear',
+                    title: {
+                      text: 'BeamCurrent(mA)'
+                    },
+                    showFirstLabel: true,
+                    showLastLabel: true,
+                    // tickPixelInterval:50,
+                    tickPositioner: function (){
+                      // console.log(this.tickPositions)
+                      if(this.tickPositions[0] > 190 && this.tickPositions[4] < 370) {
+                        return [180, 230, 280, 330, 380]
+                      }else if(this.tickPositions[0] < 190 && this.tickPositions[4] < 400){
+                        return  [0,100,200,300,400]
+                      } else if(this.tickPositions[4] < 400){
+                        let p = this.tickPositions[4];
+                        let interval = Math.ceil(p*1.1/4)
+                        return[0,interval,2*interval,3*interval,4*interval];
+                      }
+                    },
+                    // startOnTick:false,
+                    // tickAmount:5,
+                    // min:180,
+                    // max:380,
+                    lineWidth:2
+                  });
+                  _this.options.yAxis[1].opposite = false;
+                  let n = response.data.length;
+                  for (var i = 0; i < n; i++){
+                    p.push([response.data[i].smpl_time,response.data[i].float_val]);
+                  }
+                  _this.options.series.push({
+                    name: 'Beam Current(mA)',
+                    data: p,
+                    color: "#0055fa",
+                    yAxis:2,
+                    lineWidth:2,
+                  })
+                  _this.Loading = false;
+                  // console.log("min:")
+                  // console.log()
+                })
+
+
+            }else if(this.switchValue1 === false){
+              this.options.series.pop();
+              this.options.yAxis.pop();
+              this.options.yAxis[1].opposite = true;
+            }
+          },
+          changeMode(){
+            if(this.switchValue2 === true){
+              this.options.yAxis[0].softMax = null;
+              this.options.yAxis[1].softMax = null;
+            }
+            if(this.switchValue2 === false){
+              this.options.yAxis[0].softMax = 2;
+              this.options.yAxis[1].softMax = 2;
+            }
+          },
+
           tableHeaderColor({ row, column, rowIndex, columnIndex }) {
             if (rowIndex === 0) {
               return 'background-color: #ffffff;color: #000000;font-weight: 500;'
             }
-            return 'color: #000000; font-weight: 500; '
+            return 'background-color: #ffffff;color: #000000; font-weight: 800; '
           },
 
           initWebpack:function () {
             let str = window.location.href;
             // console.log(str.split("/")[2])
-            // const wsuri = "ws://"+ str.split("/")[2] + "/ws/radiation";
-            const wsuri = "ws://"+ '127.0.0.1:8081' + "/radiation";
-            this.websock = new WebSocket(wsuri);//这里面的this都指向vue
-
-            this.websock.onopen = this.websocketopen;
-            this.websock.onmessage = this.websocketonmessage;
-            this.websock.onclose = this.websocketclose;
-            this.websock.onerror = this.websocketerror;
-          },
-          websocketopen(){//打开
-              console.log("WebSocket连接成功")
-            this.send();
-          },
-          send(){
-            var postValue={};
-            this.websock.send(JSON.stringify(postValue));
-          },
-          websocketonmessage(e){ //数据接收
-            this.energy = null;
-            this.current = null;
-            this.lifetime = null;
-            let data = JSON.parse(e.data)
-            // console.log(data)
-            this.gridData1[1]["value"] = parseFloat(data['Current']).toFixed(2);
-            this.gridData1[2]["value"] = parseFloat(data['Lifetime']).toFixed(2);
-            this.gridData1[0]["value"] = parseFloat(data['Energy']).toFixed(2)
-            for (let i = 0; i < this.gridData.length; i++){
-              this.gridData[i]["Gamma"] = data[this.gridData[i]["pv"]+"-G"]
-              this.gridData[i]["Neutron"] = data[this.gridData[i]["pv"]+"-N"]
+            const wsuri = "ws://"+ str.split("/")[2] + "/ws/radiation";
+            // const wsuri = "ws://"+ '222.195.82.88:8081' + "/radiation";
+            let websock = new WebSocket(wsuri);//这里面的this都指向vue
+            // this.websock.onopen = this.websocketopen;
+            // this.websock.onmessage = this.websocketonmessage;
+            // this.websock.onclose = this.websocketclose;
+            // this.websock.onerror = this.websocketerror;
+            websock.onopen = () => {
+              var postValue={};
+              websock.send(JSON.stringify(postValue));
+            }
+            websock.onmessage = e => {
+              this.energy = null;
+              this.current = null;
+              this.lifetime = null;
+              let data = JSON.parse(e.data)
+              console.log(data)
+              this.status.beamCurrent = parseFloat(data['Current']).toFixed(2).toString()+" mA";
+              if(data['Lifetime'] === 'Infinity'){
+                this.status.lifetime = 'inf' + " hours";
+              }else {
+                this.status.lifetime = parseFloat(data['Lifetime']).toFixed(2).toString() + " hours";
+              }
+              this.status.energy = parseFloat(data['Energy']).toFixed(2).toString() + " Mev";
+              this.status.operationMode = data['OperationMode']
+              this.status.operationStatus = data['OperationStatus']
+              for (let i = 0; i < this.gridData.length; i++){
+                this.gridData[i]["Gamma"] = parseFloat(data[this.gridData[i]["pv"]+"-G"]).toFixed(6)
+                this.gridData[i]["Neutron"] = parseFloat(data[this.gridData[i]["pv"]+"-N"]).toFixed(6)
+              }
+            }
+            websock.onclose = function () {
+              // 关闭 websocket
+              console.log('连接已关闭...')
+            }
+            // 路由跳转时结束websocket链接
+            this.$router.afterEach(function () {
+              websock.close()
+              console.log("finish websocket")
+            })
+            websock.onerror = function () {
+              console.log("error occurred")
             }
           },
-          websocketclose(){  //关闭
-            console.log("WebSocket关闭");
-          },
-          websocketerror(){  //失败
-            console.log("WebSocket连接失败");
-          },
           handleClick(a){
+            console.log(a)
+            this.switchValue1 = false;
             let time11 = new Date(Date.now())
             this.dialogTableVisible = true;
             let flag = 0;
             this.options.title.text = a.pv
             this.options.series[0].data = [];
             this.options.series[1].data = [];
+            if(this.options.series.length > 2){
+              this.options.series.pop();
+            }
+            if(this.options.yAxis.length > 2){
+              this.options.yAxis.pop();
+            }
+            this.options.yAxis[1].opposite = true
             let _this = this;
             let date1 = new Date(Date.now());
             let date2 = new Date(Date.now()-3600*24*1000);
             let time1 = date1.format("yyyy-MM-dd hh:mm:ss");
             let time2 = date2.format("yyyy-MM-dd hh:mm:ss");
-            // this.dialogTableVisible = true;
             console.log(a.pv);
             let dm = a.pv.substr(2,2);
-            // console.log(dm)
-            this.$axios.get('/history/puredata/name/SR-DM-G'+ dm + ':ai/'+time2 + '/'+ time1)
+            this.$axios.get(this.urlFragment +  '/history/name/SR-DM-G'+ dm + ':uSv:calc/'+time2 + '/'+ time1)
               .then(function (response) {
-                // console.log(response.data.length)
-                // console.log("length:" + response.data.length)
+                console.log(response.data.length)
+                let p = new Array();
                 for (let i = 0; i < response.data.length; i++){
-                  _this.options.series[0].data.push([response.data[i].smpl_time,response.data[i].float_val]);
+                  p.push([response.data[i].smpl_time,response.data[i].float_val]);
                 }
+                _this.options.series[0].data = p;
                 if(flag == 0){
                   flag++;
                 }else {
                   _this.Loading = false;
                 }
               });
-            this.$axios.get('/history/puredata/name/SR-DM-N'+ dm + ':ai/'+time2 + '/'+ time1)
+            this.$axios.get(this.urlFragment + '/history/name/SR-DM-N'+ dm + ':uSv:calc/'+time2 + '/'+ time1)
               .then(function (response) {
                 // console.log(response.data)
                 // console.log("length:" + response.data.length)
+                let p = new Array();
                 for (let i = 0; i < response.data.length; i++){
-                  _this.options.series[1].data.push([response.data[i].smpl_time,response.data[i].float_val]);
+                  // _this.options.series[1].data.push([response.data[i].smpl_time,response.data[i].float_val/1000]);
+                  p.push([response.data[i].smpl_time,response.data[i].float_val]);
                 }
+                _this.options.series[1].data = p;
                 if(flag == 0){
                   flag++
                 }else {
@@ -258,11 +454,10 @@
                 }
               })
             this.Loading = true;
-          }
+          },
         },
-      beforeDestroy(){
-        this.websock.close();
-        console.log("我离开了")
+      destroy(){
+          this.websock.close();
       }
 
     }

@@ -1,14 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import charts from "@/page/activePublic/charts"
+import home from "@/page/activePublic/home"
 import help from "@/page/activePublic/help"
 import piecharts from "@/page/activePublic/piecharts"
 import integralcurrquery from "@/page/activePublic/integralcurrquery"
 import historicalcharts from "@/page/activePublic/historicalcharts"
-import filerecords from "@/page/activePublic/historicalfilerecords"
 import operstatlist from "@/page/activePublic/operstatlist"
 import radiation from "@/page/activePublic/radiation"
 import userdefinedquery from "@/page/activePublic/userdefinedquery"
+import beamcleaning from "@/page/activePublic/beamcleaning"
 
 Vue.use(Router)
 
@@ -18,12 +18,12 @@ export default new Router({
     {
       path:'/',
       name:'Operation Status',
-      component:charts
+      component:home
     },
     {
       path:'/home',
       name:'Operation Status',
-      component:charts
+      component:home
     },
     {
       path:'/help',
@@ -41,14 +41,9 @@ export default new Router({
       component:integralcurrquery
     },
     {
-      path:'/history/normalquery',
-      name:'Historical Data Normal Query',
+      path:'/history/customizedquery',
+      name:'Historical Data Customized Query',
       component: historicalcharts
-    },
-    {
-      path:'/history/filerecords',
-      name:'File Records',
-      component:filerecords
     },
     {
       path:'/analysis/operstatlist',
@@ -61,9 +56,13 @@ export default new Router({
       component:radiation
     },
     {
-      path:'/history/userdefinedquery',
-      name:'userdefinedquery',
+      path:'/history/freequery',
+      name:'Historical Data Free Query',
       component:userdefinedquery
-    }
+    },{
+      path:'/analysis/beamcleaning',
+      name:'Beam Cleaning Status',
+      component:beamcleaning
+    },
   ]
 })
