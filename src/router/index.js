@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import home from "@/page/activePublic/home"
-import help from "@/page/activePublic/help"
-import piecharts from "@/page/activePublic/piecharts"
+import about from "@/page/activePublic/about"
+import statusStatistics from "@/page/activePublic/statusStatistics"
 import integralcurrquery from "@/page/activePublic/integralcurrquery"
-import historicalcharts from "@/page/activePublic/historicalcharts"
+import customizedquery from "@/page/activePublic/customizedquery"
 import operstatlist from "@/page/activePublic/operstatlist"
 import radiation from "@/page/activePublic/radiation"
 import userdefinedquery from "@/page/activePublic/userdefinedquery"
@@ -26,14 +26,14 @@ export default new Router({
       component:home
     },
     {
-      path:'/help',
-      name:'Help Info',
-      component:help
+      path:'/about',
+      name:'About',
+      component:about
     },
     {
       path:'/analysis/operstatstatistics',
       name:'Operation Status Statistics',
-      component:piecharts
+      component:statusStatistics
     },
     {
       path:'/analysis/integral',
@@ -43,7 +43,7 @@ export default new Router({
     {
       path:'/history/customizedquery',
       name:'Historical Data Customized Query',
-      component: historicalcharts
+      component: customizedquery
     },
     {
       path:'/analysis/operstatlist',

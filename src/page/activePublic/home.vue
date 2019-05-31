@@ -1,20 +1,20 @@
 <template>
   <div style="height: 100%">
-    <div align="center">
+    <div align="center" >
       <table width="50%" align="center">
         <tr>
           <td align="right" width="25%"><font
-            style="color: #004499; font-size: 20px;"> Operation mode:</font></td>
+            style="color: #004499; font-size: 20px;"> Operation Schedule:</font></td>
           <td align="left" width="25%"><font
             style="color: #8A2BE2; font-size: 20px;">{{status.operationMode}}</font></td>
           <td align="right" width="25%"><font
-            style="color: #004499; font-size: 20px;"> Operation status:</font></td>
+            style="color: #004499; font-size: 20px;"> Operation Status:</font></td>
           <td align="left" width="25%"><font
             style="color: #8A2BE2; font-size: 20px;">{{status.operationStatus}}</font></td>
         </tr>
         <tr>
           <td align="right" width="25%"><font
-            style="color: #004499; font-size: 20px;"> Beam current:</font></td>
+            style="color: #004499; font-size: 20px;"> Beam Current:</font></td>
           <td align="left" width="25%"><font
             style="color: #8A2BE2; font-size: 20px;">{{status.beamCurrent}}</font></td>
           <td align="right" width="25%"><font
@@ -30,8 +30,7 @@
         </tr>
       </table>
     </div>
-    <div style="" align="center">
-      <highstock :options = 'options' style="width: 70%" :hidden="true"></highstock>
+    <div align="center">
       <highcharts :options = 'options' style="width: 70%"></highcharts>
       <div align="left" style="width:50%;">
         <el-switch
@@ -71,11 +70,14 @@
                 zoomType: null,
                 enabled:false,
                 plotBorderWidth: 2,
-                plotBorderColor: 'grey'
+                plotBorderColor: 'grey',
+                animation:false
               },
               plotOptions: {
+
                 series:{
-                  turboThreshold:10000
+                  turboThreshold:10000,
+                  animation:false,
                 },
                 line: {
                   dataGrouping: {
@@ -83,16 +85,22 @@
                   }
                 }
               },
-              // navigator:{
-              //   enabled:false
-              // },
               title: {
                 text: null
               },
               xAxis: {
+                gridLineDashStyle:'ShortDash',
+                gridLineWidth: 1,
                 lineColor:'grey',
                 ordinal:false,
                 type: 'datetime',
+                title:{
+                  text:'Time',
+                  style: {
+                    color:"black",
+                    fontWeight:1000,
+                  }
+                },
                 dateTimeLabelFormats: {
                   millisecond: '%H:%M:%S.%L',
                   second: '%H:%M:%S',
@@ -107,58 +115,78 @@
                 // endOnTick:true,
                 max: new Date().getTime(),
                 min: new Date(Date.now()-24*1000*60*60).getTime()
-
-                // scrollBar:{
-                //   enabled:false
               },
               yAxis: [{
+                // gridLineDashStyle:'ShortDash',
+                gridLineWidth:0,
                 lineColor:'grey',
                 showFirstLabel: true,
                 showLastLabel: true,
                 opposite:false,
                 type: 'linear',
                 title: {
-                  text: 'Beam Current(mA)'
+                  text: 'Beam Current(mA)',
+                  style: {
+                    color:"black",
+                    fontWeight:1000
+                  }
                 },
                 lineWidth:2,
-                tickPositioner: function () {
-                  // console.log(this.tickPositions)
-                  let n = this.tickPositions.length;
-                  if(Math.abs(this.tickPositions[0]-this.tickPositions[n-1])>=150){
-                    let p = this.tickPositions[n-1];
-                    let interval = Math.ceil(Math.ceil(p / 4)/10)*10
-                    return [0, interval, 2 * interval, 3 * interval, 4 * interval];
-                  } else if(this.tickPositions[0] > 190 && this.tickPositions[n-1] < 370) {
-                    return [180, 230, 280, 330, 380]
-                  } else if (this.tickPositions[0] < 190 && this.tickPositions[n-1] < 400 && Math.abs(this.tickPositions[0]-this.tickPositions[n-1])>=100) {
-                    return [0, 100, 200, 300, 400]
-                  } else if (this.tickPositions[n-1] < 400) {
-                    let p = this.tickPositions[n-1];
-                    let interval = Math.ceil(Math.ceil(p / 4)/10)*10
-                    return [0, interval, 2 * interval, 3 * interval, 4 * interval];
-                  }else{
-                    let p = this.tickPositions[n-1];
-                    let interval = Math.ceil(Math.ceil(p / 4)/10)*10
-                    return [0, interval, 2 * interval, 3 * interval, 4 * interval];
-                  }
-                }
+                // labels: {
+                //   formatter:function(){
+                //     if(this.value < 1){
+                //       // return Highcharts.numberFormat(this.value,4)
+                //       return this.value.toFixed(4)
+                //     }
+                //     return this.value
+                //   }
+                // },
+                // tickPositioner: function () {
+                //   console.log(this.tickPositions)
+                //   let n = this.tickPositions.length;
+                //   if(Math.abs(this.tickPositions[0]-this.tickPositions[n-1])>=150){
+                //     let p = this.tickPositions[n-1];
+                //     let interval = Math.ceil(Math.ceil(p / 5)/10)*10
+                //     return [0, interval, 2 * interval, 3 * interval, 4 * interval,5*interval];
+                //   } else if(this.tickPositions[0] > 190 && this.tickPositions[n-1] < 370) {
+                //     return [180, 220, 260, 300, 340, 380]
+                //   } else if (this.tickPositions[0] < 190 && this.tickPositions[n-1] < 400 && Math.abs(this.tickPositions[0]-this.tickPositions[n-1])>=100) {
+                //     return [0, 80, 160, 240, 320, 400]
+                //   }else if(this.tickPositions[0] < 1){
+                //     let p = new Array();
+                //     if(n < 6){return this.tickPositions;  }
+                //     for (let i = 0; i < 6; i++){
+                //       console.log(parseFloat(this.tickPositions[i]).toFixed(4))
+                //       // console.log(Highcharts.numberFormat(1.2345,2))
+                //       p.push(parseFloat(this.tickPositions[i]))
+                //     }
+                //     return p;
+                //   }else {
+                //     return this.tickPositions;
+                //   }
+                // }
+                // min:0,
+                startOnTick:false,
+                min:0,
+                // max:350
               },
                 {
+                  gridLineWidth:0,
                   lineColor:'grey',
                   showFirstLabel: true,
                   showLastLabel: true,
                   opposite:true,
                   type: 'linear',
                   title: {
-                    text: 'Lifetime(hours)'
+                    text: 'Lifetime(hours)',
+                    style: {
+                      color:"black",
+                      fontWeight:1000
+                    }
                   },
-                  tickPositioner: function () {
-                    // console.log(this.tickPositions)
-                      let p = this.tickPositions[this.tickPositions.length-1];
-                      let interval = Math.ceil(Math.ceil(p/ 4)/10)*10
-                      return [0, interval, 2 * interval, 3 * interval, 4 * interval];
-                  },
+                  startOnTick:false,
                   lineWidth:2,
+
                 }],
               tooltip: {
                 dateTimeLabelFormats: {
@@ -173,9 +201,7 @@
                 }
               },
               credits: {
-                // enabled:true,    // 默认值，如果想去掉版权信息，设置为false即可
-                text: 'NSRL@USTC', // 显示的文字
-                href: 'http://www.nsrl.ustc.edu.cn'
+                enabled:false,
               },
               legend: {
                 enabled: true,
@@ -242,6 +268,8 @@
           })
           this.timer = setInterval(getIntegralData,30000);
           function getIntegralData() {
+            _this.options.xAxis.max = new Date().getTime()
+            _this.options.xAxis.min = new Date(Date.now()-24*1000*60*60).getTime()
              let p = new Array();
              date1 = new Date(Date.now());
              date2 = new Date(Date.now()-3600*24*1000);
@@ -267,15 +295,9 @@
       methods:{
         initWebpack:function () {
           let str = window.location.href;
-          // console.log(str.split("/")[2])
           const wsuri = "ws://"+ str.split("/")[2] + "/ws/status";
           // const wsuri = "ws://"+ '222.195.82.88:8081' + "/status";
           let websock = new WebSocket(wsuri);
-
-          // this.websock.onopen = this.websocketopen;
-          // this.websock.onmessage = this.websocketonmessage;
-          // this.websock.onclose = this.websocketclose;
-          // this.websock.onerror = this.websocketerror;
           websock.onopen = () => {
             var postValue={};
             websock.send(JSON.stringify(postValue));
@@ -300,12 +322,10 @@
           }
           websock.onclose = function () {
             // 关闭 websocket
-            console.log('连接已关闭...')
           }
           // 路由跳转时结束websocket链接
           this.$router.afterEach(function () {
             websock.close()
-            console.log("finish websocket")
           })
           websock.onerror = function () {
             console.log("error occurred")

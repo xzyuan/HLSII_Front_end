@@ -1,19 +1,25 @@
 <template>
-  <el-container>
-    <el-aside width="20%"  style="margin-left: 4%;margin-top: 1%">
-      <el-tree :data='treeData' :props="defaultProps" @node-click="nodeClicked" >
-        <span class="custom-tree-node" slot-scope="{ node, data }">
-          <span>{{ node.label }}</span></span></el-tree>
-    </el-aside>
-    <el-main>
+  <div>
+    <el-row>
+      <el-col :span="4" >
+        <div style=" color: black;width:100%;" align="right">
+          <el-card class="box-card" style="margin-top:2%;border-radius: 8px;" align="right">
+          <el-tree :data='treeData' :props="defaultProps" @node-click="nodeClicked" >
+            <span class="custom-tree-node" slot-scope="{ node, data }">
+              <span>{{ node.label }}</span>
+            </span>
+          </el-tree>
+          </el-card>
+        </div>
+      </el-col>
       <el-dialog title="Data" :visible.sync="dialogTableVisible" width="90%" align="center" >
         <div :hidden="dataLoading">
           <i class="el-icon-loading" ></i>
         </div>
         <el-row>
-          <div align="center">
-          <el-table :data="gridData">
-            <el-table-column v-for = "col in checkedPvList" :property="col" :label="col" :key="col" width="250%"></el-table-column>
+          <div align="center" style="color: #000;"  >
+          <el-table :data="gridData" style="color: #000;" align="center">
+            <el-table-column v-for = "col in checkedPvList" :property="col" :label="col" :key="col"  align="center" width="300" header-align="center"></el-table-column>
           </el-table>
           </div>
         </el-row>
@@ -40,18 +46,22 @@
           <el-table-column property="Min" label="Min"></el-table-column>
         </el-table>
       </el-dialog>
-      <div class="chartDiv" style="margin-top: 1%; margin-left: auto; margin-right: auto;" align="center" v-loading="chartLoading">
-        <highstock :options = 'options' style="width: 100%" ></highstock>
+      <el-col :span="1"><div><p></p></div></el-col>
+      <el-col :span="14"  align="center">
+      <div class="chartDiv" style=" margin-top: 3%; margin-left: auto; margin-right: auto; width: 1000px;" align="center" v-loading="chartLoading">
+        <highstock :options = 'options' style="width: 100%;" ></highstock>
       </div>
-      <div><div align="center">
-        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
-      </div>
+      <div>
+        <div align="center">
+          <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+        </div>
         <div :align="checkBoxAlign" >
-          <el-checkbox-group v-model="checkedPvList" @change="handleCheckedPvListChange">
-            <el-checkbox v-for="pv1 in pvList" :label="pv1.name" :key="pv1.pvname"><font size=4  style="font-family: 'Consolas';font-weight: normal; ">{{pv1.name}}</font></el-checkbox>
+          <el-checkbox-group v-model="checkedPvList" @change="handleCheckedPvListChange" border="true">
+            <el-checkbox v-for="pv1 in pvList" :label="pv1.name" :key="pv1.pvname" style="color: #000;"><font size=4  style="font-family: 'Consolas';font-weight: normal; ">{{pv1.name}}</font></el-checkbox>
           </el-checkbox-group>
         </div>
       </div>
+
       <div class="block" style="margin-top: 1%; font-weight: bold;" align="center">
         <el-date-picker
           v-model="value5"
@@ -66,12 +76,12 @@
       </div >
       <div style="margin-top: 1%" align="center">
         <el-button v-on:click="query" type="primary" style="background-color: #004499; border-color: #004499" :disabled="queryDisabled">Draw Line Chart</el-button>
-        <el-button v-on:click="showStatistics" type="primary" style="background-color: #004499; border-color: #004499">Statistics Data</el-button>
-        <el-button @click="showData" type="primary" style="background-color: #004499; border-color: #004499">View Data</el-button>
-        <el-button v-on:click="downloadData" type="primary" style="background-color: #004499; border-color: #004499">Download Data</el-button>
+        <el-button v-on:click="showStatistics" type="primary" style="background-color: #004499; border-color: #004499" :disabled="statisticsDisabled">Statistics Data</el-button>
+        <el-button @click="showData" type="primary" style="background-color: #004499; border-color: #004499" :disabled="dataDisabled">View Data</el-button>
+        <el-button v-on:click="downloadData" type="primary" style="background-color: #004499; border-color: #004499" :disabled="downloadDisabled">Download Data</el-button>
       </div>
       <div style="margin-top: 1%" align="center" >
-        <div :hidden="isHidden">
+        <div :hidden="switchHidden">
         <el-switch
           active-color="#13ce66"
           inactive-color="#696969"
@@ -91,13 +101,17 @@
         </el-switch>
         </div>
         <div style="width: 30%; margin-top: 10px" :hidden="progressHidden">
-          <font>正在下载第{{downloadSeries}}个文件</font>
+          <!--<font>正在下载第{{downloadSeries}}个PV</font>-->
+          <font>downloading data of the {{downloadSeries}}st selected record</font>
         <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage" >Download Progress</el-progress>
         </div>
       </div>
-
-    </el-main>
-  </el-container>
+      </el-col>
+      <el-col :span="5">
+        <div><p></p></div>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 
 <script>
@@ -105,6 +119,10 @@
         name: "historicalcharts",
         data (){
           return {
+            timer:null,
+
+            tipDialogVivible:true,
+
             //disabled
             queryDisabled:false,
             statisticsDisabled:false,
@@ -120,7 +138,7 @@
 
             downloadSeries:1,
 
-            idHidden:false,
+            switchHidden:false,
             //进度条
             progressHidden:true,
             percentage:0,
@@ -142,23 +160,26 @@
 
             //图表属性
             options: {
-              scrollbarEnabled:false,
+              // scrollbarEnabled:false,
               chart: {
                 width: 1000,
-                height: 400,
+                height: 550,
+                // panning: false, //禁用放大
+                // pinchType: '', //禁用手势操作
+                // zoomType: "",
+                // panKey: 'shift',
                 zoomType: 'x',
+                panKey: 'shift',
                 resetZoomButton: {
-                  position: {
-                    // align: 'right', // by default
-                    // verticalAlign: 'top', // by default
-                    x: 0,
-                    y: -30
-                  },
-                  relativeTo: 'chart'
+                  relativeTo: 'chart',
+                  animation:false
                 },
+                // spacingBottom:200,
                 plotBorderWidth: 1,
                 plotBorderColor: 'grey'
               },
+              colors: ['#FF0000', '#434348', '#90ed7d', '#f7a35c', '#8085e9',
+                '#f15c80', '#e4d354', '#8085e8', '#8d4653', '#91e8e1'],
               noData: {
                 style: {
                   fontWeight: 'bold',
@@ -168,7 +189,8 @@
               },
               plotOptions: {
                 series:{
-                  turboThreshold:10000
+                  turboThreshold:2000,
+                  animation:false
                 },
                 line: {
                   dataGrouping: {
@@ -180,7 +202,16 @@
                 text: null
               },
               xAxis: {
+                gridLineDashStyle:'ShortDash',
+                gridLineWidth: 1,
                 ordinal:false,
+                title:{
+                  text:'Time',
+                  style: {
+                    color:"black",
+                    fontWeight:1000
+                  }
+                },
                 type: 'datetime',
                 dateTimeLabelFormats: {
                   millisecond: '%H:%M:%S.%L',
@@ -213,16 +244,24 @@
                 }
               },
               credits: {
-                // enabled:true,    // 默认值，如果想去掉版权信息，设置为false即可
-                text: 'NSRL@USTC', // 显示的文字
-                href: 'http://www.nsrl.ustc.edu.cn'
+                enabled:false,
               },
               rangeSelector: false,
+              navigator:{
+                margin:40
+                // enabled:false
+              },
+              scrollbar:{
+                // enabled:false
+                // height:0
+              },
               legend: {
                 enabled: true,
                 verticalAlign: 'bottom',
                 // layout: 'vertical',
-                align: 'middle'
+                align: 'middle',
+                layout:'horizontal',
+                maxHeight:40
               },
               series:[]
             },
@@ -277,9 +316,6 @@
 
             statisticsDialogTableVisible:false,
             statisticsData:[],
-
-            //分页属性
-            //使用懒加载，加载一页，显示一页
             pageNumber:0,
             pageSize:100,
             currentPage:1,
@@ -297,7 +333,8 @@
                 _this.$notify.error({
                   title: '错误',
                   message: 'PV列表获取失败',
-                  position: 'bottom-left'
+                  position: 'top-right',
+                  offset:400
                 });
               }
                p= response.data;
@@ -323,7 +360,8 @@
             _this.$notify.error({
               title: '错误',
               message: 'PV列表获取失败',
-              position: 'bottom-left'
+              position: 'top-right',
+              offset:400
             });
           });
           // console.log(a)
@@ -343,42 +381,26 @@
               let time1 = date1.format("yyyy-MM-dd hh:mm:ss");
               let time2 = date2.format("yyyy-MM-dd hh:mm:ss");
               this.$axios
-                .get(this.urlFragment  + '/add/' + time1 + '/' + time2)
+                .get(this.urlFragment  + '/history/id/149/' + time1 + '/' + time2)
                 .then(function (response) {
                   let n = response.data.length;
                   _this.options.yAxis.push({
+                    gridLineDashStyle:'ShortDash',
+                    gridLineWidth: 0,
                     opposite:true,
                     type: 'linear',
                     title: {
-                      text: 'BeamCurrent(mA)'
+                      text: 'BeamCurrent(mA)',
+                      style: {
+                        color:"black",
+                        fontWeight:4000
+                      }
                     },
+                    startOnTick:false,
                     lineColor:'grey',
                     showFirstLabel: true,
                     showLastLabel: true,
-                    // tickPixelInterval:50,
-                    tickPositioner: function (){
-                      let n = this.tickPositions.length;
-                      if(Math.abs(this.tickPositions[0]-this.tickPositions[n-1])>=150){
-                        let p = this.tickPositions[n-1];
-                        let interval = Math.ceil(Math.ceil(p / 4)/10)*10
-                        return [0, interval, 2 * interval, 3 * interval, 4 * interval];
-                      } else if(this.tickPositions[0] > 190 && this.tickPositions[n-1] < 370) {
-                        return [180, 230, 280, 330, 380]
-                      } else if (this.tickPositions[0] < 190 && this.tickPositions[n-1] < 400 && Math.abs(this.tickPositions[0]-this.tickPositions[n-1])>=100) {
-                        return [0, 100, 200, 300, 400]
-                      } else if (this.tickPositions[n-1] < 400) {
-                        let p = this.tickPositions[n-1];
-                        let interval = Math.ceil(Math.ceil(p / 4)/10)*10
-                        return [0, interval, 2 * interval, 3 * interval, 4 * interval];
-                      }else{
-                        let p = this.tickPositions[n-1];
-                        let interval = Math.ceil(Math.ceil(p / 4)/10)*10
-                        return [0, interval, 2 * interval, 3 * interval, 4 * interval];
-                      }
-                    },
-                    // startOnTick:false,
-                    // tickAmount:5,
-                    // min:180,
+                    min:0,
                     // max:380,
                     lineWidth:2
                   });
@@ -386,21 +408,21 @@
                     p.push([response.data[i].smpl_time,response.data[i].float_val]);
                   }
                   _this.options.series.push({
-                    name: 'Beam Current',
+                    name: 'RNG:BEAM:CURR',
                     data: p,
                     color: "#0055fa",
                     yAxis:1,
                     lineWidth:1.5
                   })
                 })
-            }else if(this.switchValue2 === false){
+            }else if(this.switchValue2 === false){   //关闭开关
               if(this.pvList[0].name === "BeamCurrent"){
                 return;
               }
               if(this.options.yAxis[this.options.yAxis.length - 1].title.text === "BeamCurrent(mA)") {
                 this.options.yAxis.pop();
               }
-              if(this.options.series[this.options.series.length - 1].name === 'Beam Current') {
+              if(this.options.series[this.options.series.length - 1].name === 'RNG:BEAM:CURR') {
                 this.options.series.pop();
               }
             }
@@ -445,17 +467,15 @@
                   let n = response.data.length;
                   for (let i = 0; i < n; i++){
                     _this.pvList.push(response.data[i]);
-                    console.log("record :" + _this.pvList)
                   }
                 })
             },
-            query:function() {
+            query: function() {
               if(this.checkedPvList === null || this.checkedPvList.length === 0){
-                this.$notify.error({
-                  title: '错误',
-                  message: '待查询PV列表为空',
-                  position: 'bottom-left'
-                });
+                this.$confirm("请选择需要查询的PV","提示",{
+                  showCancelButton:false,
+                  showConfirmButton:false,
+                })
                 return;
               }
               this.queryDisabled = true;
@@ -476,93 +496,167 @@
               let time1 = date1.format("yyyy-MM-dd hh:mm:ss");
               let time2 = date2.format("yyyy-MM-dd hh:mm:ss");
               let _this = this;
-              let checkedPvList = this.checkedPvList;
-              let count = this.checkedPvList.length;
-              console.log(checkedPvList)
+              let checkedPvList = [];
+              for (let i = 0; i < this.checkedPvList.length; i++){
+                checkedPvList.push([this.checkedPvList[i]])
+              }
+              let pvList = ""
+              for (let i = 0; i < checkedPvList.length; i++) {
+                let flag = false;
+                let pv = "";
+                for (let j = 0; j < this.pvList.length; j++) {
+                  console.log(checkedPvList[i][0])
+                  if (this.pvList[j].name === checkedPvList[i][0]) {
+                    flag = true;
+                    pv = this.pvList[j].pv;
+                    pvList = pvList + pv + "@";
+                    checkedPvList[i].push(pv)
+                    break;
+                  }
+                }
+              }
               this.options.series = [];
               for (let i = 0; i < checkedPvList.length; i++) {
-                  let pv = this.pvList1[this.checkedPvList[i]];
-                  let name = this.checkedPvList[i];
-                  let p = new Array();
-                  this.$axios.get(this.urlFragment + "/history/name/" + pv + "/" + time1 + "/" + time2)
-                    .then(function (response) {
-                        if(response.status !== 200){
-                          _this.$notify.error({
-                            title: '错误',
-                            message: 'Query failed',
-                            position: 'bottom-left'
-                          });
-                          if(--count === 0){
-                            _this.queryDisabled = false;
-                            _this.chartLoading = false
-                          }
-                          return;
+                this.options.series.push({
+                  name:checkedPvList[i][1],
+                  data:[],
+                  yAxis: 0,
+                  lineWidth: 1.5
+                })
+              }
+              if(this.pvList[0].name === "BeamCurrent"){
+                this.options.series[0].color = "#0055fa";
+                if(this.checkedPvList[0] === "BeamCurrent"){
+                  if(this.checkedPvList.length > 1){
+                    this.options.yAxis.push({
+                      opposite:true,
+                      type: 'linear',
+                      title: {
+                        text: 'LifeTime(hrs)',
+                        style: {
+                          color:"black",
+                          fontWeight:1000
                         }
-                        if(response.data == null || response.data === ""){
-                          _this.$notify.error({
-                            title: '错误',
-                            message: 'PV ' + name + " query results set is null",
-                            position: 'bottom-left'
-                          });
-                          if(--count === 0){
-                            _this.queryDisabled = false;
-                            _this.chartLoading = false
-                          }
-                          return;
-                        }
-                      if(response.data[0].float_val != null){
-                        for (let i = 0; i < response.data.length; i++) {
-                          p.push([response.data[i].smpl_time, response.data[i].float_val]);
-                        }
-                      }else {
-                        for (let i = 0; i < response.data.length; i++) {
-                          p.push([response.data[i].smpl_time, response.data[i].num_val]);
-                        }
-                      }
-                        let tmp = 0;
-                        if(pv === "RNG:BEAM:LIFE"){
-                          _this.options.yAxis.push({
-                            opposite:true,
-                            type: 'linear',
-                            title: {
-                              text: 'LifeTime(hrs)'
-                            },
-                            lineColor:'grey',
-                            showFirstLabel: true,
-                            showLastLabel: true,
-                          })
-                          tmp = 1;
-                        }
-                      _this.options.series.push({
-                        name: name,
-                        data: p,
-                        yAxis:tmp,
-                        lineWidth:1.5
-                      })
-                      if(pv === "RNG:BEAM:CURR"){
-                        _this.options.series[0].color = "#0055fa";
-                      }
-                      if(--count === 0){
-                        _this.queryDisabled = false;
-                        _this.chartLoading = false
-                      }
-                      p = [];
+                      },
+                      gridLineWidth:0,
+                      lineColor:'grey',
+                      showFirstLabel: true,
+                      showLastLabel: true,
                     })
-                    .catch(function (error) {
-                      _this.chartLoading = true
-                      _this.queryDisabled = false;
-                    });
+                    this.options.series[1].yAxis = 1;
+                    this.options.series[1].color = "#FF0000";
+                  }
+                }else{
+                  this.options.yAxis.push({
+                    opposite:false,
+                    type: 'linear',
+                    title: {
+                      text: 'LifeTime(hrs)',
+                      style: {
+                        color:"black",
+                        fontWeight:1000
+                      }
+                    },
+                    gridLineWidth:0,
+                    lineColor:'grey',
+                    showFirstLabel: true,
+                    showLastLabel: true,
+                  })
+                  this.options.series[0].yAxis = 1;
+                  this.options.series[0].color = "#FF0000"
+                }
+              }
+              let emptyPvList = []
+              let failedPvList = []
+              this.$axios.get(this.urlFragment + "/history/nameMap/" + pvList + "/" + time1 + "/" + time2)
+                .then(function (response) {
+                  if(response.status !== 200) {
+                    _this.$confirm("查询失败","提示",{
+                      showCancelButton:false,
+                      showConfirmButton:false,
+                    })
+                    _this.queryDisabled = false;
+                    _this.chartLoading = false;
+                    return
+                  }
+                  if(response.data == null || response.data === "" || response.data.length === 0) {
+                    _this.$confirm("查询结果为空","提示",{
+                      showCancelButton:false,
+                      showConfirmButton:false,
+                    })
+                    _this.queryDisabled = false;
+                    _this.chartLoading = false;
+                    return
+                  }
+                  let data = response.data;
+                  for(let k = 0; k < checkedPvList.length; k++){
+                    let name = checkedPvList[k][1]
+                    if(data[name] === null || data[name].length === 0){
+                      emptyPvList.push(name);
+                      continue;
+                    }
+                    let p = [];
+                    p.push([date1.getTime(),null])
+                    if(data[name][0].float_val != null){
+                      for (let i = 0; i < data[name].length; i++) {
+                        p.push([data[name][i].smpl_time, data[name][i].float_val]);
+                      }
+                    }else {
+                      for (let i = 0; i < data[name].length; i++) {
+                        p.push([data[name][i].smpl_time, data[name][i].num_val]);
+                      }
+                    }
+                    p.push([date2.getTime(),null]);
+                    _this.options.series[k].data = p;
+                  }
+                  _this.queryDisabled = false;
+                  _this.chartLoading = false;
+                  alertInfo(failedPvList,emptyPvList);
+                })
+              function alertInfo(failedPvList, emptyPvList) {
+                if(failedPvList.length !== 0){
+                  let str = "";
+                  for (let j = 0; j < failedPvList.length; j++) {
+                    if(j < 10) {
+                      str += failedPvList[j] + "\n";
+                      continue
+                    }
+                    if(j === 10){
+                      str += '等' + failedPvList.length + '个PV';
+                      break;
+                    }
+                  }
+                  _this.$notify.error({
+                    title:'error',
+                    message: str + "查询失败",
+                    position:'top-right',
+                    offset: 400,
+                    duration: 0
+                  })
+                }
+                if (emptyPvList.length !== 0){
+                  let str = "";
+                  for (let j = 0; j < emptyPvList.length; j++) {
+                    if(j < 10) {
+                      str += emptyPvList[j] + "\n";
+                      continue
+                    }
+                    if(j === 10){
+                      str += '等' + emptyPvList.length + '个PV';
+                      break;
+                    }
+                  }
+                  _this.$notify.error({
+                    title:'error',
+                    message:str + "查询结果为空",
+                    position:'top-right',
+                    offset: 400,
+                    duration: 0
+                  })
+                }
               }
             },
             nodeClicked:function (arg1,arg2,arg3) {
-                this.isHidden = false;
-                this.checkBoxAlign = "center"
-                this.options.yAxis = []
-                this.isIndeterminate = false;
-                this.switchValue1 = false;
-                this.switchValue2 = false;
-                this.checkAll = false;
-                this.checkedPvList = [];    //清空多选框，清空pvList列表
                 let a = arg1;
                 let flag = true;
                 for(var i in arg1){
@@ -573,9 +667,26 @@
                 let name ;
                 let _this = this;
                 if(flag == true) {
+                  clearInterval(this.timer);
+                  this.value5 = []
+                  this.value5.push(new Date(Date.now()-3600*24*1000))
+                  this.value5.push(new Date(Date.now()))
+                  this.progressHidden = true
+                  this.switchHidden = false;
+                  this.checkBoxAlign = "center"
+                  this.options.yAxis = []
+                  this.isIndeterminate = false;
+                  this.switchValue1 = false;
+                  this.switchValue2 = false;
+                  this.checkAll = false;
+                  this.queryDisabled = false
+                  this.statisticsLoading = true
+                  this.dataLoading = true
+                  this.downloadDisabled = false
+                  this.checkedPvList = [];    //清空多选框，清空pvList列表
                   this.statisticsData = [];
                   this.options.series = [];
-                  this.gridData = []
+                  this.gridData = [];
                   for (let i in arg1) {
                     if (i == "pvname") {
                       // console.log(arg1[i])
@@ -589,10 +700,11 @@
                         _this.$notify.error({
                           title: '错误',
                           message: 'PV列表获取失败',
-                          position: 'bottom-left'
+                          position: 'top-right',
+                          offset:400,
+                          duration:0
                         });
                       }
-                      // console.log("pv列表: " + response.data);
                       _this.pvList.length = 0;
                       if(response.data.length > 5){
                         _this.checkBoxAlign = "left"
@@ -603,12 +715,25 @@
                         _this.pvList.push(response.data[i])
                       }
                       if(_this.pvList[0].name === "BeamCurrent"){
-                        _this.isHidden = true;
+                        _this.switchHidden = true;
                         _this.options.yAxis.push({
+                          showFirstLabel: true,
+                          showLastLabel: true,
+                          gridLineWidth: 0,
                           lineColor:'grey',
-                          title: {text: "Current(mA)"},
+                          title: {
+                            text: "Current(mA)",
+                            style: {
+                              color:"black",
+                              fontWeight:1000
+                            }
+                          },
                           opposite: false,lineWidth:2})
                         _this.options.yAxis.push({
+                          showFirstLabel: true,
+                          showLastLabel: true,
+                          gridLineDashStyle:'ShortDash',
+                          gridLineWidth: 0,
                           lineColor:'grey',
                           title: {text: "LifeTime(hrs)"},
                           opposite: true,lineWidth:2})
@@ -616,9 +741,19 @@
                         _this.$axios.get(_this.urlFragment  + '/pvunit/' + _this.pvList[0].pv)
                           .then(function (response) {
                             _this.options.yAxis.push({
+                              showFirstLabel: true,
+                              showLastLabel: true,
+                              gridLineDashStyle:'ShortDash',
+                              gridLineWidth: 0,
                               type:'linear',
                               lineColor:'grey',
-                              title: {text: response.data},
+                              title: {
+                                text: response.data,
+                                style: {
+                                  color:"black",
+                                  fontWeight:1000
+                                }
+                              },
                               opposite: false, lineWidth: 2
                             })
                           })
@@ -628,12 +763,13 @@
                 }
             },
             showStatistics: function () {
+              let a = 0.011617911222
+              console.log(a.toPrecision())
               if(this.checkedPvList === null || this.checkedPvList.length === 0){
-                this.$notify.error({
-                  title: '错误',
-                  message: '待查询PV列表为空',
-                  position: 'bottom-left'
-                });
+                this.$confirm("请选择需要查询的PV","提示",{
+                  showCancelButton:false,
+                  showConfirmButton:false,
+                })
                 return;
               }
               this.statisticsDialogTableVisible = true;
@@ -647,72 +783,145 @@
               let time2 = date2.format("yyyy-MM-dd hh:mm:ss");
               let _this = this;
               let checkedPvList = this.checkedPvList;
-              this.options.series = [];
               let count = this.checkedPvList.length;
+              let failedPvList = []
+              let emptyPvList = []
               for (let i = 0; i < checkedPvList.length; i++) {
-                console.log('请求'  + i)
                 let pv = this.pvList1[this.checkedPvList[i]];
                 let name = this.checkedPvList[i];
                 let p = new Array();
+                this.statisticsData.push({
+                  Pv_Name:name,
+                  Mean:null,
+                  Deviation:null,
+                  RMS:null,
+                  Max:null,
+                  Min:null
+                })
                 this.$axios.get(this.urlFragment +  "/history/statistics/" + pv + "/" + time1 + "/" + time2)
                   .then(function (response) {
-                    // console.log(response.data)
                     if(response.status != 200){
-                      _this.$notify.error({
-                        title: '错误',
-                        message: 'PV ' + pv + " query results set failed",
-                        position: 'bottom-left'
-                      });
+                      failedPvList.push(pv)
                       if (--count === 0) {
+                        if(failedPvList.length !== 0){
+                          let str = "  ";
+                          for (let j = 0; j < failedPvList.length; j++) {
+                            str += failedPvList[j] + "  ";
+                          }
+                          _this.$notify.error({
+                            title:'error',
+                            message:'查询' + failedPvList + "失败",
+                            position:'top-right',
+                            offset: 400,
+                            duration:0
+                          })
+                        }
+                        if (emptyPvList.length !== 0){
+                          for (let j = 0; j < emptyPvList.length; j++) {
+                            str += emptyPvList[j] + "  ";
+                          }
+                          _this.$notify.error({
+                            title:'error',
+                            message:emptyPvList + "查询结果为空",
+                            position:'top-right',
+                            offset: 400,
+                            duration:0
+                          })
+                        }
                         _this.statisticsLoading = true
                       }
                       return;
                     }
                     if(response.data == null || response.data === "") {
-                      _this.$notify.error({
-                        title: '错误',
-                        message: 'PV ' + name + " query results set is null",
-                        position: 'bottom-left'
-                      });
+                      emptyPvList.push(pv)
                       if (--count === 0) {
+                        alertInfo(failedPvList,emptyPvList)
                         _this.statisticsLoading = true
                       }
                       return;
                     }
-                    // console.log(response.data)
-                    _this.statisticsData.push({
-                      Pv_Name:name,
-                      Mean:response.data.Mean.toFixed(6),
-                      Deviation:response.data.Deviation.toFixed(6),
-                      RMS:response.data.RMS.toFixed(6),
-                      Max:response.data.Max.toFixed(6),
-                      Min:response.data.Min.toFixed(6)
-                    })
+                    for(let o in _this.statisticsData[i]){
+                      if (o !== 'Pv_Name') {
+                        console.log(o)
+                        if(Math.abs(response.data[o]) < 0.1) {
+                          if(o === 'Deviation'){
+                            console.log(response.data[o].classNames)
+                          }
+                          _this.statisticsData[i][o] = response.data[o].toPrecision(6)
+                        } else {
+                          _this.statisticsData[i][o] = response.data[o].toFixed(6)
+                        }
+                      }
+                    }
+                    // _this.statisticsData[i].Mean = response.data.Mean
+                    // _this.statisticsData[i].Deviation = response.data.Deviation
+                    // _this.statisticsData[i].RMS = response.data.RMS
+                    // _this.statisticsData[i].Max = response.data.Max
+                    // _this.statisticsData[i].Min = response.data.Min
                     if(--count === 0){
+                      alertInfo(failedPvList,emptyPvList)
                       _this.statisticsLoading = true;
                     }
                   })
                   .catch(function (error) {
-                    console.log('出现错误')
-                      _this.$notify.error({
-                        title: '错误',
-                        message: 'PV ' + name + " query failed",
-                        position: 'bottom-left'
-                      })
+                      failedPvList.push(pv)
                     if(--count === 0){
+                      alertInfo(failedPvList,emptyPvList)
                       _this.statisticsLoading = true;
                     }
                     }
                   );
               }
+
+              function alertInfo(failedPvList,emptyPvList) {
+                if(failedPvList.length !== 0){
+                  let str = "";
+                  for (let j = 0; j < failedPvList.length; j++) {
+                    if(j < 10) {
+                      str += failedPvList[j] + "\n";
+                      continue
+                    }
+                    if(j === 10){
+                      str += '等' + failedPvList.length + '个PV';
+                      break;
+                    }
+                  }
+                  _this.$notify.error({
+                    title:'error',
+                    message:'查询' + str + "失败",
+                    position:'top-right',
+                    offset: 400,
+                    duration: 0
+                  })
+                }
+                if (emptyPvList.length !== 0){
+                  let str = "";
+                  for (let j = 0; j < emptyPvList.length; j++) {
+                    if(j < 10) {
+                      str += emptyPvList[j] + "\n";
+                      continue
+                    }
+                    if(j === 10){
+                      str += '等' + emptyPvList.length + '个PV';
+                      break;
+                    }
+                  }
+                  _this.$notify.error({
+                    title:'error',
+                    message:str + "查询结果为空",
+                    position:'top-right',
+                    offset: 400,
+                    duration: 0
+                  })
+                }
+              }
             },
             downloadData:function () {
               if(this.checkedPvList === null || this.checkedPvList.length === 0){
-                this.$notify.error({
-                  title: '错误',
-                  message: '待查询PV列表为空',
-                  position: 'bottom-left'
-                });
+                this.$confirm("请选择需要下载的PV","提示",{
+                  showCancelButton:false,
+                  showConfirmButton:false,
+                })
                 return;
               }
               this.downloadSeries = 1;
@@ -724,7 +933,6 @@
               let checkedPvList = this.checkedPvList;
               let pvList = "";
               let _this = this;
-              // console.log(checkedPvList);
               for (let i = 0; i < checkedPvList.length; i++) {
                 let flag = false;
                 let pv = "";
@@ -739,38 +947,62 @@
                   }
                 }
               }
-              if(!(pvList == null || pvList.length == 0)){
-                this.progressHidden = false
-                this.$axios.get(this.urlFragment  + '/download/' + time1 +"/" + time2 + "/" + name + "/" + pvList)
-                  .then(function (response) {
-                  // console.log("文件名"+ response.data);
-                  //   let name  = response.data;
-                    let str = window.location.href;
-                    //caution
-                    window.open('http://' + str.split("/")[2] + '/data/download/media/'+name)
-                    // window.open('http://' + '222.195.82.88:8081' + '/download/media/'+name)
-                    _this.progressHidden = true;
-                    clearInterval(timer);
-                    _this.percentage = 0;
-
-                });
-                let timer = setInterval(getIntegralData,1000);
-                function getIntegralData() {
-                  _this.$axios.get(_this.urlFragment + '/download/status/' + name)
-                    .then(function (response) {
-                      _this.downloadSeries = response.data[0]
-                        _this.percentage = response.data[1]
-                    })
-                }
-              }
+              this.downloadDisabled = true;
+              this.$confirm("正在计算文件大小和下载时间","提示",{
+                showCancelButton:false,
+                showConfirmButton:false,
+                closeOnClickModal:false,
+                closeOnPressEscape:false,
+                closeOnHashChange:false
+              })
+              this.$axios.get(_this.urlFragment  + '/download/' + pvList + "/" + time1 +"/" + time2)
+                .then(function (response) {
+                  _this.$msgbox.close()
+                  _this.$confirm("Estimated file size: " + (response.data/30000).toFixed(3) + "M, download time:" + (response.data/40000).toFixed(2) + "s， continue?","Tips",{
+                    confirmButtonText: 'confirm',
+                    cancelButtonText: 'cancel',
+                    type: 'warning'
+                  }).then(() => {
+                    if(!(pvList == null || pvList.length == 0)){
+                      _this.downloadDisabled = true;
+                      _this.progressHidden = false;
+                      _this.$notify.info({
+                        title:'提示',
+                        message:'正在下载中，请勿离开当前页面',
+                        position: 'top-right',
+                        offset:400
+                      })
+                      _this.$axios.get(_this.urlFragment  + '/download/' + time1 +"/" + time2 + "/" + name + "/" + pvList)
+                        .then(function (response) {
+                          let str = window.location.href;
+                          window.open('http://' + str.split("/")[2] + '/data/download/media/'+response.data)
+                          // window.open('http://' + '222.195.82.88:8081' + '/download/media/'+response.data)
+                          _this.progressHidden = true;
+                          _this.downloadDisabled = false
+                          clearInterval(_this.timer);
+                          _this.percentage = 0;
+                        });
+                      _this.timer = setInterval(getIntegralData,1000);
+                      function getIntegralData() {
+                        _this.$axios.get(_this.urlFragment + '/download/status/' + name)
+                          .then(function (response) {
+                            _this.downloadSeries = response.data[0]
+                            _this.percentage = response.data[1]
+                          })
+                      }
+                    }
+                  }).catch(() => {
+                    _this.progressHidden = true
+                    _this.downloadDisabled = false
+                  })
+                })
             },
             showData:function () {
               if(this.checkedPvList === null || this.checkedPvList.length === 0){
-                this.$notify.error({
-                  title: '错误',
-                  message: 'Please select PV to query',
-                  position: 'bottom-left'
-                });
+                this.$confirm("请选择需要查询的PV","提示",{
+                  showCancelButton:false,
+                  showConfirmButton:false,
+                })
                 return;
               }
               this.currentPage = 1;
@@ -815,21 +1047,23 @@
                 this.$axios.get(this.urlFragment + "/history/page/" + val + "/" + this.pageSize + "/" + pv + "/" + time1 + "/" + time2)
                   .then(function (response) {
                     if(response.status != 200){
-                      _this.$notify.error({
-                        title: '错误',
-                        message: 'PV ' + pv + " query results set failed",
-                        position: 'bottom-left'
-                      });
+                      // _this.$notify.error({
+                      //   title: '错误',
+                      //   message: 'PV ' + pv + " 查询失败",
+                      //   position: 'top-right',
+                      //   offset:400
+                      // });
                       if (--count === 0) {
                         _this.dataLoading = true
                       }
                       return;
                     }else if(response.data == null || response.data === "" || response.data.length === 0) {
-                      _this.$notify.error({
-                        title: '错误',
-                        message: 'PV ' + name + " query results set is null",
-                        position: 'bottom-left'
-                      });
+                      // _this.$notify.error({
+                      //   title: '错误',
+                      //   message: 'PV ' + name + " 查询结果为空",
+                      //   position: 'top-right',
+                      //   offset:400
+                      // });
                       if (--count === 0) {
                         _this.dataLoading = true
                       }
@@ -837,26 +1071,31 @@
                     }
                     if(response.data[0].float_val !== null) {
                       for (let j = 0; j < response.data.length; j++) {
-                        let time = new Date(response.data[j].smpl_time).format("yyyy-MM-dd hh:mm:ss");
-                        _this.gridData[j][checkedPvList[i]] = time.toString() + "\r\n\r\r\r\n" +
-                          response.data[j].float_val.toFixed(6);
+                        let time = new Date(response.data[j].smpl_time).format("yyyy-MM-dd hh:mm:ss.S");
+                        if (Math.abs(response.data[j].float_val) < 0.1) {
+                          console.log(time.toString().length)
+                          _this.gridData[j][checkedPvList[i]] = time.toString() + "\r\n\r\r\r\n" +
+                            response.data[j].float_val.toPrecision(6);
+                        } else {
+                          console.log(time.toString().length)
+                          _this.gridData[j][checkedPvList[i]] = time.toString() + "\r\n\r\r\r\n" +
+                            response.data[j].float_val.toFixed(6);
+                        }
                       }
                     }else{
                       for (let j = 0; j < response.data.length; j++) {
-                        let time = new Date(response.data[j].smpl_time).format("yyyy-MM-dd hh:mm:ss");
+                        let time = new Date(response.data[j].smpl_time).format("yyyy-MM-dd hh:mm:ss.S");
                         _this.gridData[j][checkedPvList[i]] = time.toString() + "\r\n\r\r\r\n" +
-                          response.data[j].num_val.toFixed(6);
+                          response.data[j].num_val.toPrecision(6);
                       }
                     }
-                    count--
-                    if(count === 0){
+                    if(--count === 0){
                       _this.dataLoading = true;
                     }
                   })
               }
             },
             pageChange:function (val) {
-              console.log('pagechange')
               this.dataLoading = true;
               this.currentPage = val;
               this.gridData = [];
@@ -890,10 +1129,25 @@
                 let p = new Array();
                 this.$axios.get(this.urlFragment + "/history/page/" + val + "/" + this.pageSize + "/" + pv + "/" + time1 + "/" + time2)
                   .then(function (response) {
-                    for (let j = 0; j < response.data.length; j++) {
-                      let time = new Date(response.data[j].smpl_time).format("yyyy-MM-dd hh:mm:ss");
-                      _this.gridData[j][checkedPvList[i]] = time.toString() + "\r\n\r\r\r\n" +
-                        response.data[j].float_val.toFixed(6);
+                    if(response.data[0].float_val !== null) {
+                      for (let j = 0; j < response.data.length; j++) {
+                        let time = new Date(response.data[j].smpl_time).format("yyyy-MM-dd hh:mm:ss.S");
+                        if (Math.abs(response.data[j].float_val) < 0.1) {
+                          console.log(time.toString().length)
+                          _this.gridData[j][checkedPvList[i]] = time.toString() + "\r\n\r\r\r\n" +
+                            response.data[j].float_val.toPrecision(6);
+                        } else {
+                          console.log(time.toString().length)
+                          _this.gridData[j][checkedPvList[i]] = time.toString() + "\r\n\r\r\r\n" +
+                            response.data[j].float_val.toFixed(6);
+                        }
+                      }
+                    } else {
+                      for (let j = 0; j < response.data.length; j++) {
+                        let time = new Date(response.data[j].smpl_time).format("yyyy-MM-dd hh:mm:ss.S");
+                        _this.gridData[j][checkedPvList[i]] = time.toString() + "\r\n\r\r\r\n" +
+                          response.data[j].num_val.toPrecision(6);
+                      }
                     }
                     if(--count === 0){
                       _this.dataLoading = true;
@@ -909,6 +1163,7 @@
     margin-left: 0px;
   }
   .el-checkbox {
+    color: #000;
     margin-right: 25px;
   }
   div{
@@ -923,7 +1178,9 @@
     align-items: center;
     justify-content: space-between;
     font-size: 16px;
+    color:#000000;
     font-weight: bold;
     padding-right: 8px;
   }
+
 </style>

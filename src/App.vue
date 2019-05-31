@@ -1,6 +1,6 @@
 <template>
-  <div style="min-width: 1400px;">
-     <el-row style="background-color: #ffffff; height:80px; " :gutter="20" type="flex">
+  <div style="min-width: 1400px">
+     <el-row style="background-color: #ffffff; height:80px; "  type="flex">
       <el-col :span="12" :offset="6" align="center">
         <p class="grid-content bg-purple-dark" style="font-size: xx-large; margin-top: 20px;" >
           <font style="font-size: xx-large;font-weight: bold;font-family: Arial, Helvetica, sans-serif; color: #004499">HLS-Ⅱ {{this.$route.name}}</font>
@@ -10,42 +10,43 @@
     </el-row>
     <el-row >
       <!-- #004499   #2d6ba9   #ffd04b  -->
-          <el-menu :default-active="$route.path" class="el-menu-demo" mode="horizontal" @select="handleSelect" background-color="#004499"
+          <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect" background-color="#004499"
                    text-color="#ffffff"
-                   active-text-color="#ffffff"
+                   active-text-color="#ffd04b"
+                   :router="routerMode"
                     >
-            <el-col :span="3"><div><p></p></div></el-col>
-            <el-col  :span="3" align="center">
-              <el-menu-item index="/home" align="center" ><router-link class="routernav" STYLE="text-decoration:none;
-               font-weight: bold;font-family: Arial, Helvetica, sans-serif;" to="/home">Home</router-link></el-menu-item>
+            <el-col :span="2"><div><p></p></div></el-col>
+            <el-col  :span="4" align="center">
+              <el-menu-item index="/home" align="center">Operation Status</el-menu-item>
               </el-col>
-            <el-col :span="3" align="center">
+            <el-col :span="4" align="center">
               <div>
-              <el-submenu index="/history" align="center">
-                <template slot="title" style="width: 100%;"><font style="font-size: large;font-weight: bold;font-family: Arial, Helvetica, sans-serif;width: 100%;">Historical Data</font></template>
-                <el-menu-item index="2-1"><router-link to="/history/customizedquery" style="text-decoration: none; width: 10px;" >Customized Query</router-link></el-menu-item>
-                <el-menu-item index="2-2"><router-link to="/history/freequery" style="text-decoration: none">Free Query</router-link></el-menu-item>
-              </el-submenu>
+                <el-submenu index="/history" align="center">
+                  <template slot="title" style="width: 100%;"><font style="font-size: large;font-weight: bold;font-family: Arial, Helvetica, sans-serif;width: 100%;">Historical Data</font></template>
+                  <el-menu-item index="/history/customizedquery">Customized Query</el-menu-item>
+                  <el-menu-item index="/history/freequery">Free Query</el-menu-item>
+                </el-submenu>
               </div>
             </el-col>
-            <el-col :span="3" align="center">
-              <el-submenu index="3" align="center">
-                <template slot="title"><font style="font-size: large;">Data Analysis</font></template>
-                <el-menu-item index="3-1"><router-link STYLE="text-decoration:none" to="/analysis/operstatstatistics">Oper Stat Statistics</router-link></el-menu-item>
-                <el-menu-item index="3-2"><router-link STYLE="text-decoration:none" to="/analysis/operstatlist">Oper Stat List</router-link></el-menu-item>
-                <el-menu-item index="3-3"><router-link STYLE="text-decoration:none" to="/analysis/integral">Integral Current</router-link></el-menu-item>
-                <el-menu-item index="3-4"><router-link STYLE="text-decoration:none" to="/analysis/beamcleaning">Beam Cleaning</router-link></el-menu-item>
+            <el-col :span="4" align="center">
+              <el-submenu index="3" align="center" style="width: 100%">
+                <template slot="title" style="width: 100%"><font style="font-size: large;">Data Analysis</font></template>
+                <el-menu-item index="/analysis/operstatstatistics" style="width: 100%">Oper Stat Statistics</el-menu-item>
+                <el-menu-item index="/analysis/operstatlist">Oper Stat List</el-menu-item>
+                <el-menu-item index="/analysis/integral">Integral Current</el-menu-item>
+                <el-menu-item index="/analysis/beamcleaning">Beam Cleaning</el-menu-item>
               </el-submenu>
             </el-col>
-            <el-col :span="3" align="center">
-              <el-menu-item index="4" align="center">Alarm</el-menu-item>
+            <!--<el-col :span="4" align="center">-->
+              <!--<el-menu-item index="/alarm" align="center">Alarm</el-menu-item>-->
+            <!--</el-col>-->
+            <el-col :span="4" align="center">
+              <el-menu-item index="/radiation" align="center">Radiation Monitor</el-menu-item>
             </el-col>
-            <el-col :span="3" align="center">
-              <el-menu-item index="5" align="center"><router-link to="/radiation" STYLE="text-decoration:none">Radiation Monitor</router-link></el-menu-item>
+            <el-col :span="4" align="center">
+              <el-menu-item index="/about" align="center">About</el-menu-item>
             </el-col>
-            <el-col :span="3" align="center">
-              <el-menu-item index="/help" align="center"><router-link to="/help" STYLE="text-decoration:none">About</router-link></el-menu-item>
-            </el-col>
+            <el-col :span="2"><div><p></p></div></el-col>
           </el-menu>
       </el-row>
       <el-row>
@@ -56,9 +57,9 @@
       </el-row>
       <el-footer height="30px">
         <div>
-          <p align="center">
-            Copyright Controls Group, Machine Division, NSRL
-          </p>
+          <div align="center" style="margin-top: 10px">
+            Copyright Controls Group, Machine Division, NSRL<b/>
+          </div>
         </div>
       </el-footer>
 
@@ -66,23 +67,20 @@
 </template>
 
 <script>
-  import Foot from "@/page/activePublic/foot";
-
   export default {
     name: 'app',
-    components: {Foot},
     data() {
       return {
-        // activeIndex2: "$route.path",
-        activeIndex: 1,
-        navConfig:{
-          charts:0,
-          'history/normalquery':1
-        },
+        routerMode:true,
+        activeIndex: '/home' ,
         timeNow: '',
       };
     },
+    created:function(){
+
+    },
     mounted(){
+      this.defaultIndex()
       let _this = this;   //声明一个变量指向Vue实例this，保证作用域一致
       this.timer = setInterval(function () {
         _this.timeNow = new Date().format("yyyy-MM-dd hh:mm:ss").toString();    //修改数据date
@@ -90,10 +88,9 @@
     },
     methods: {
       handleSelect(key, keyPath) {
-        console.log("点击了")
-        console.log(key, keyPath);
-        this.activeIndex = key
-        console.log(this.$route.path)
+      },
+      defaultIndex(){
+        this.activeIndex = this.$route.matched[0].path;
       }
     },
     beforeDestory:function () { //清除定时器
@@ -111,13 +108,21 @@
     text-decoraction: none;
     color: white;
   }
+  .routernav{
+    text-decoraction: none;
+  }
 
   .el-menu-item,.el-submenu {
     border-left: 2px solid #ffffff;
     border-right: 2px solid #ffffff;
     font-size: large;
-    font-weight: bolder;
     font-family: Arial, Helvetica, sans-serif;
+    text-decoration:none;
+    font-weight: bold;
+  }
+
+  .el-menu-item{
+    width: 100%;
   }
 
   .template{
@@ -135,8 +140,5 @@
     font-size: large;
     margin-bottom: fill;
   }
-  /*html,#cont{*/
-    /*height: 100%;*/
-  /*}*/
 
 </style>

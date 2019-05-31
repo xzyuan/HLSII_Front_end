@@ -1,11 +1,11 @@
 <template>
   <div id="div1">
-    <el-dialog :visible.sync="dialogTableVisible" width="80%" element-loading-text="Loading"
+    <el-dialog :visible.sync="dialogTableVisible" width="70%" element-loading-text="Loading"
                element-loading-spinner="el-icon-loading"
                element-loading-background="rgba(255, 255, 255, 0)"
                 style="height: 1000px;">
       <el-main v-loading="Loading">
-        <div style="height:400px;min-width:300px">
+        <div align="center">
           <highstock :options = 'options' style="height:100%;width: 100%"></highstock>
         </div>
         <el-switch
@@ -27,79 +27,58 @@
     <el-row>
       <el-col :span="11" offset="2" >
         <div style="width: 100%">
-          <el-table :data = "gridData1" border :show-header="showHeader" style="width: 80%; margin-left: auto; margin-right: auto;
-            margin-top: 10px;" row-style="height:0"  cell-style="padding:5px" :hidden="true">
-            <el-table-column property="pv" label = '' align="center"></el-table-column>
-            <el-table-column property="value" label = '' align="center"></el-table-column>
-          </el-table>
-
           <div align="center" style="margin-top: 15px;margin-bottom: 15px;">
-            <table width="80%" align="center">
+            <table width="90%" align="center">
               <tr>
                 <td align="right" width="25%"><font
-                  style="color: #004499; font-size: 20px;"> Operation mode:</font></td>
+                  style="color: #004499; font-size: 18px;"> Operation Schedule:</font></td>
                 <td align="left" width="25%"><font
-                  style="color: #8A2BE2; font-size: 20px;">{{status.operationMode}}</font></td>
+                  style="color: #8A2BE2; font-size: 18px;">{{status.operationMode}}</font></td>
                 <td align="right" width="25%"><font
-                  style="color: #004499; font-size: 20px;"> Operation status:</font></td>
+                  style="color: #004499; font-size: 18px;"> Operation Status:</font></td>
                 <td align="left" width="25%"><font
-                  style="color: #8A2BE2; font-size: 20px;">{{status.operationStatus}}</font></td>
+                  style="color: #8A2BE2; font-size: 18px;">{{status.operationStatus}}</font></td>
               </tr>
               <tr>
                 <td align="right" width="25%"><font
-                  style="color: #004499; font-size: 20px;"> Beam current:</font></td>
+                  style="color: #004499; font-size: 18px;"> Beam Current:</font></td>
                 <td align="left" width="25%"><font
-                  style="color: #8A2BE2; font-size: 20px;">{{status.beamCurrent}}</font></td>
+                  style="color: #8A2BE2; font-size: 18px;">{{status.beamCurrent}}</font></td>
                 <td align="right" width="25%"><font
-                  style="color: #004499; font-size: 20px;"> Lifetime:</font></td>
+                  style="color: #004499; font-size: 18px;"> Lifetime:</font></td>
                 <td align="left" width="25%"><font
-                  style="color: #8A2BE2; font-size: 20px;">{{status.lifetime}}</font></td>
+                  style="color: #8A2BE2; font-size: 18px;">{{status.lifetime}}</font></td>
               </tr>
               <tr>
                 <td align="right" width="25%" ><font
-                  style="color: #004499; font-size: 20px;"> Energy:</font></td>
+                  style="color: #004499; font-size: 18px;"> Energy:</font></td>
                 <td align="left" width="25%" ><font
-                  style="color: #8A2BE2; font-size: 20px;">{{status.energy}}</font></td>
+                  style="color: #8A2BE2; font-size: 18px;">{{status.energy}}</font></td>
               </tr>
             </table>
           </div>
-
-
         </div>
-
-        <el-table :data="gridData" border row-class-name="table_class" style="font-size: small; width: 80%; margin-left: auto;
-        margin-right: auto;margin-top: 20px;" row-style="height:0"
-                             cell-style="padding:0" :header-cell-style="tableHeaderColor" :hidden="true">
-        <el-table-column property="pv" label="" align="center"></el-table-column>
-        <el-table-column property="Gamma" label="Gamma(μSv/h)" align="center" width="140"></el-table-column>
-        <el-table-column property="Neutron" label="Neutron(μGr/h)" align="center" width="140"></el-table-column>
-        <el-table-column label="Latest 24 hrs data" align="center" width="140">
-          <template slot-scope="scope">
-            <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
         <table border="1px" cellspacing="0px" align=center
-               bordercolor="#000000" style="margin-top: 30px;">
+               bordercolor="#000000" style="margin-top: 10px;">
           <tr>
-            <td align="center"><font size="4" color="#000000">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td>
-            <td align="center"><font size="4" color="#000000">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;Gamma(μSv/h)&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</font></td>
-            <td align="center"><font size="4" color="#000000">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;Neutron(μGr/h)&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</font></td>
-            <td align="center"><font size="4" color="#000000"> &nbsp; &nbsp;&nbsp;Latest 24 hrs data&nbsp; &nbsp; &nbsp;</font></td>
+            <td align="center"><font size="3" color="#000000">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td>
+            <td align="center"><font size="3" color="#000000">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;Gamma(μSv/h)&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</font></td>
+            <td align="center"><font size="3" color="#000000">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;Neutron(μGr/h)&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</font></td>
+            <td align="center"><font size="3" color="#000000"> &nbsp; &nbsp;&nbsp;Latest 24 hrs data&nbsp; &nbsp; &nbsp;</font></td>
           </tr>
           <tr v-for="item in gridData">
-            <td align="center"><font size="3">{{item.pv}}</font></td>
-            <td align="center"><font size="3">{{item.Gamma}}</font></td>
-            <td align="center"><font size="3">{{item.Neutron}}</font></td>
+            <td align="center"><font size="3" color="#004499">{{item.pv}}</font></td>
+            <td align="center"><font size="3" color="#8A2BE2">{{item.Gamma}}</font></td>
+            <td align="center"><font size="3" color="#8A2BE2">{{item.Neutron}}</font></td>
             <td align="center">
-                <el-button @click="handleClick(item)" type="text" size="small">查看</el-button>
+                <el-button @click="handleClick(item)" type="text" size="small">view</el-button>
             </td>
           </tr>
         </table>
       </el-col>
       <el-col :span="11" align="left" style="margin-top: 50px">
         <div style="margin-left: 40px;">
-          <img src="../../assets/OPI_BG1.png" width="550px" height="70%"/>
+          <img :src="imgUrl" width="480px" height="480px"/>
         </div>
       </el-col>
     </el-row>
@@ -111,6 +90,7 @@
         name: "radiation",
         data(){
           return{
+            imgUrl:'/static/picture/1.0.3.png',
             status:{
               operationMode:"",
               beamCurrent:"",
@@ -146,18 +126,22 @@
             options: {
               chart: {
                 zoomType: 'x',
+                height:500,
+                width:1000,
+                animation:false,
                 resetZoomButton: {
                   position: {
-                    // align: 'right', // by default
-                    // verticalAlign: 'top', // by default
                     x: 0,
                     y: -30
                   },
                   relativeTo: 'chart'
-                }
+                },
+                plotBorderWidth: 2,
+                plotBorderColor: 'grey',
               },
               plotOptions: {
                 series:{
+                  animation:false,
                   turboThreshold:10000
                 },
                 line: {
@@ -170,25 +154,41 @@
                 text: ''
               },
               xAxis: {
+                gridLineDashStyle:'ShortDash',
+                gridLineWidth: 1,
+                title:{
+                  text:'Time',
+                  style: {
+                    color:"black",
+                    fontWeight:1000
+                  }
+                },
                 type: 'datetime',
+                showFirstLabel:true,
+                showLastLabel:true,
                 dateTimeLabelFormats: {
                   millisecond: '%H:%M:%S.%L',
                   second: '%H:%M:%S',
                   minute: '%H:%M',
                   hour: '%H:%M',
-                  day: '%m-%d',
+                  day: '%m-%d %H:%M',
                   week: '%m-%d',
                   month: '%Y-%m',
                   year: '%Y'
                 }
               },
               yAxis: [{
+                gridLineWidth:0,
                 showFirstLabel: true,
                 showLastLabel: true,
                 opposite:false,
                 type: 'linear',
                 title: {
-                  text: 'Gamma(μSV/h)'
+                  text: 'Gamma(μSV/h)',
+                  style: {
+                    color:"black",
+                    fontWeight:1000
+                  }
                 },
                 softMax:2,
                 // softMin:0,
@@ -200,12 +200,17 @@
                 },
                 lineWidth:1
               },{
+                gridLineWidth:0,
                 showFirstLabel: true,
                 showLastLabel: true,
                 opposite:true,
                 type: 'linear',
                 title: {
-                  text: 'Neutron(μGr/h)'
+                  text: 'Neutron(μGr/h)',
+                  style: {
+                    color:"black",
+                    fontWeight:1000
+                  }
                 },
                 softMax:2,
                 labels: {
@@ -221,16 +226,14 @@
                   second: '%H:%M:%S',
                   minute: '%H:%M',
                   hour: '%H:%M',
-                  day: '%Y-%m-%d',
+                  day: '%Y-%m-%d %H:%M',
                   week: '%m-%d',
                   month: '%Y-%m',
                   year: '%Y'
                 }
               },
               credits: {
-                // enabled:true,    // 默认值，如果想去掉版权信息，设置为false即可
-                text: 'NSRL@USTC', // 显示的文字
-                href: 'http://www.nsrl.ustc.edu.cn'
+                enabled:false,
               },
               rangeSelector: false,
               legend: {
@@ -242,13 +245,15 @@
               series:[{
                 name:'Gamma(μSV/h)',
                 data:[],
+                color:"#FF0000",
                 yAxis:0,
-                lineWidth:2
+                lineWidth:1.5
               },{
                 name:'Neutron(μGr/h)',
                 data:[],
+                color:"black",
                 yAxis:1,
-                lineWidth:2
+                lineWidth:1.5
               }]
             },
           }
@@ -283,33 +288,22 @@
               this.$axios
                 .get(this.urlFragment + '/history/id/149/' + time2 + '/' + time1)
                 .then(function (response) {
-                  console.log(response.data)
                   _this.options.yAxis.push({
+                    gridLineWidth:0,
                     opposite:true,
                     type: 'linear',
                     title: {
-                      text: 'BeamCurrent(mA)'
+                      text: 'BeamCurrent(mA)',
+                      style: {
+                        color:"black",
+                        fontWeight:1000
+                      }
                     },
                     showFirstLabel: true,
                     showLastLabel: true,
-                    // tickPixelInterval:50,
-                    tickPositioner: function (){
-                      // console.log(this.tickPositions)
-                      if(this.tickPositions[0] > 190 && this.tickPositions[4] < 370) {
-                        return [180, 230, 280, 330, 380]
-                      }else if(this.tickPositions[0] < 190 && this.tickPositions[4] < 400){
-                        return  [0,100,200,300,400]
-                      } else if(this.tickPositions[4] < 400){
-                        let p = this.tickPositions[4];
-                        let interval = Math.ceil(p*1.1/4)
-                        return[0,interval,2*interval,3*interval,4*interval];
-                      }
-                    },
-                    // startOnTick:false,
-                    // tickAmount:5,
-                    // min:180,
-                    // max:380,
-                    lineWidth:2
+                    lineWidth:2,
+                    startOnTick:false,
+                    min:150
                   });
                   _this.options.yAxis[1].opposite = false;
                   let n = response.data.length;
@@ -321,11 +315,9 @@
                     data: p,
                     color: "#0055fa",
                     yAxis:2,
-                    lineWidth:2,
+                    lineWidth:1.5,
                   })
                   _this.Loading = false;
-                  // console.log("min:")
-                  // console.log()
                 })
 
 
@@ -358,11 +350,7 @@
             // console.log(str.split("/")[2])
             const wsuri = "ws://"+ str.split("/")[2] + "/ws/radiation";
             // const wsuri = "ws://"+ '222.195.82.88:8081' + "/radiation";
-            let websock = new WebSocket(wsuri);//这里面的this都指向vue
-            // this.websock.onopen = this.websocketopen;
-            // this.websock.onmessage = this.websocketonmessage;
-            // this.websock.onclose = this.websocketclose;
-            // this.websock.onerror = this.websocketerror;
+            let websock = new WebSocket(wsuri);
             websock.onopen = () => {
               var postValue={};
               websock.send(JSON.stringify(postValue));
@@ -388,16 +376,12 @@
               }
             }
             websock.onclose = function () {
-              // 关闭 websocket
-              console.log('连接已关闭...')
             }
             // 路由跳转时结束websocket链接
             this.$router.afterEach(function () {
               websock.close()
-              console.log("finish websocket")
             })
             websock.onerror = function () {
-              console.log("error occurred")
             }
           },
           handleClick(a){

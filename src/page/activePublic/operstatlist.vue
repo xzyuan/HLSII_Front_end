@@ -1,6 +1,9 @@
 <template>
   <div>
     <div class="block" style="margin-top: 2%" align="center">
+      <div :hidden="iconLoading">
+        <i class="el-icon-loading" ></i>
+      </div>
       <el-date-picker
         v-model="value5"
         type="datetimerange"
@@ -13,14 +16,15 @@
     </div>
     <el-row>
       <el-col align="center" style="margin-top: 2px;">
-        <el-button v-on:click="query1" type="primary" :disabled="disabled">query</el-button>
+        <el-button v-on:click="query1" type="primary" style="background-color: #004499; border-color: #004499" :disabled="disabled">query</el-button>
       </el-col>
     </el-row>
     <el-row>
       <el-col align="center">
+        <!--gridData.slice((currentPage-1)*pageSize,currentPage*pageSize)-->
         <el-table v-loading="pieLoading"
-          :data="gridData.slice((currentPage-1)*pageSize,currentPage*pageSize)" style="width: 100%" align="center"
-          :row-class-name="tableRowClassName" :highlight-current-row = 'true'>
+          :data="gridData" style="width: 100%" align="center"
+          :row-class-name="tableRowClassName">
           <el-table-column prop="startTime" label="Start Time" width="180" align="center"></el-table-column>
           <el-table-column prop="endTime" label="End Time" width="180" align="center"></el-table-column>
           <el-table-column prop="interval" label="Interval" width="180" align="center"></el-table-column>
@@ -29,15 +33,15 @@
       </el-col>
     </el-row>
     <el-row>
-      <div align="center">
-        <span class="demonstration">page select</span>
-      </div>
-      <el-pagination
-        layout="prev, pager, next,jumper"
-        :page-count="pageNumber"
-        :current-page.sync="currentPage"
-        @current-change="pageChange" align="center">
-      </el-pagination>
+      <!--<div align="center">-->
+        <!--<span class="demonstration">page select</span>-->
+      <!--</div>-->
+      <!--<el-pagination-->
+        <!--layout="prev, pager, next,jumper"-->
+        <!--:page-count="pageNumber"-->
+        <!--:current-page.sync="currentPage"-->
+        <!--@current-change="pageChange" align="center">-->
+      <!--</el-pagination>-->
     </el-row>
   </div>
 </template>
@@ -47,8 +51,9 @@
         name: "operstatlist",
         data(){
           return {
+            iconLoading:true,
             disabled:false,
-            pieLoading:true,
+            pieLoading:false,
 
             pageNumber:0,
             pageSize:50,
@@ -101,13 +106,14 @@
             this.query();
           },
           query:function () {
+            let date1 = new Date(this.value5[1]);
+            let date2 = new Date(this.value5[0]);
             this.disabled = true;
-            this.pieLoading = true;
+            // this.pieLoading = true;
+            this.iconLoading = false;
             let q = new Array();
             let n;
             let _this = this;
-            let date1 = new Date(this.value5[1]);
-            let date2 = new Date(this.value5[0]);
             let time1 = date1.format("yyyy-MM-dd hh:mm:ss");
             let time2 = date2.format("yyyy-MM-dd hh:mm:ss");
             let startTime,endTime;
@@ -118,35 +124,40 @@
                 if(response1.status != 200){
                   _this.$notify.error({
                     title: '错误',
-                    message: 'PV ' + pv + " query results set failed",
-                    position: 'bottom-left'
+                    message: '运行状态数据获取失败' ,
+                    position: 'top-right',
+                    offset:400
                   });
-                  _this.pieLoading = false
+                  // _this.pieLoading = false
                   _this.disabled = false
+                  _this.iconLoading = true
                   return;
                 }
                 if(response1.data == null || response1.data === "" || response1.data.length === 0) {
                   _this.$notify.error({
                     title: '错误',
-                    message: 'PV ' + name + " query results set is null",
-                    position: 'bottom-left'
+                    message: '运行状态数据获取结果为空',
+                    position: 'top-right',
+                    offset:400
                   });
-                  _this.pieLoading = false
+                  // _this.pieLoading = false
                   _this.disabled = false
+                  _this.iconLoading = true
                   return;
                 }
                   lastest = response1.data;
-                  _this.$axios.get(_this.urlFragment + '/history/statusStatistics/' + time2 + '/' + time1)
-            // let status = ["Init","ShutDown","Injection","BeamAvailable","Tuning"]
+                  _this.$axios.get(_this.urlFragment + '/history/status/' + time2 + '/' + time1)
                     .then(function (response) {
                       if(response.status != 200){
                         _this.$notify.error({
                           title: '错误',
-                          message: "status statistics query results set failed",
-                          position: 'bottom-left'
+                          message: "运行状态数据获取失败",
+                          position: 'top-right',
+                          offset:400
                         });
-                        _this.pieLoading = false
+                        // _this.pieLoading = false
                         _this.disabled = false
+                        _this.iconLoading = true
                         return;
                       }
                       if(response.data === null || response.data.length === 0) {
@@ -157,11 +168,12 @@
                           status:status[lastest.num_val]
                         })
                         _this.gridData = q;
-                        _this.pieLoading = false
+                        // _this.pieLoading = false
                         _this.disabled = false
+                        _this.iconLoading = true
                         return;
                       }
-                    n = response.data.length;
+                      n = response.data.length;
                       _this.pageNumber = Math.ceil(n%_this.pageSize ? n/_this.pageSize : n/_this.pageSize +1);
                       q.push({
                       startTime:date2.format("yyyy-MM-dd hh:mm:ss").toString(),
@@ -186,9 +198,10 @@
                     status:status[response.data[n-1].num_val]
                   })
                   _this.gridData = q;
-                  _this.pieLoading = false
+                  // _this.pieLoading = false
                   _this.disabled = false
-                })
+                      _this.iconLoading = true
+                    })
               })
             function  calc1(date3) {
               var days=Math.floor(date3/(24*3600*1000))
@@ -227,19 +240,17 @@
             this.currentPage = val;
           },
           tableRowClassName({row, rowIndex}) {
-            if (rowIndex === 1) {
-              return 'warning-row';
-            } else if (rowIndex === 3) {
-              return 'success-row';
+            if(row.status === 'BeamAvailable'){
+              return 'success-row'
             }
-            return '';
+            return ''
           }
         }
     }
 
 </script>
 
-<style scoped>
+<style>
   .el-table .warning-row {
     background: oldlace;
   }

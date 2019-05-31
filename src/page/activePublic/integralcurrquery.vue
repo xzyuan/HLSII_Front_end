@@ -2,33 +2,15 @@
   <div id="main">
     <el-dialog title="Integral Current" :visible.sync="dialogTableVisible" align="center">
       <el-row>
-      <el-table :data="gridData.slice((currentPage-1)*pageSize,currentPage*pageSize)" width="60%"  align="center" >
-        <el-table-column property="curr_date" label="date" width="150" style=" align:center;"></el-table-column>
-        <el-table-column property="val" label="value" width="200" style=" align:center;"></el-table-column>
+        <!--gridData.slice((currentPage-1)*pageSize,currentPage*pageSize)-->
+      <el-table :data="gridData" width="60%"  align="center" >
+        <el-table-column property="curr_date" label="Time" width="150" align="center"></el-table-column>
+        <el-table-column property="val" label="A*Hour" width="200" align="center"></el-table-column>
       </el-table>
       </el-row>
-      <el-row>
-        <div align="center">
-        <span class="demonstration" align="center">page select</span>
-        <el-pagination
-          layout="prev, pager, next,jumper"
-          :page-count="pageNumber"
-          :current-page.sync="currentPage"
-          @current-change="pageChange"
-          align="center">
-        </el-pagination>
-        </div>
-      </el-row>
-    </el-dialog>
-    <el-dialog title="Statistics" :visible.sync="statisticsDialogTableVisible" align="center">
-      <el-table :data="statisticsData">
-        <el-table-column property="Pv Name" label="Pv Name"></el-table-column>
-        <el-table-column property="Mean" label="Mean"></el-table-column>
-        <el-table-column property="Deviation" label="Deviation"></el-table-column>
-        <el-table-column property="RMS" label="RMS"></el-table-column>
-        <el-table-column property="Max" label="Max"></el-table-column>
-        <el-table-column property="Min" label="Min"></el-table-column>
-      </el-table>
+      <div>
+        <span style="color: #004499; font-size: 20px;">Total integral current:  {{totalValue}}</span>
+      </div>
     </el-dialog>
     <div class="chartDiv" style="margin-top: 2%" align="center">
       <highstock :options = 'options' style="width: 60%"></highstock>
@@ -37,17 +19,18 @@
       <!--<span class="demonstration">选择查询时间段</span><br/>-->
       <el-date-picker
         v-model="value5"
-        type="datetimerange"
-        :picker-options="pickerOptions"
-        range-separator="to"
-        start-placeholder="start time"
-        end-placeholder="end time"
-        align="right">
+        type="daterange"
+        align="right"
+        unlink-panels
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        :picker-options="pickerOptions2">
       </el-date-picker>
     </div>
     <div style="margin-top: 2%" align="center">
-      <el-button v-on:click="query" type="primary">Draw Line Chart</el-button>
-      <el-button @click="dialogTableVisible = true" type="primary">View Data</el-button>
+      <el-button v-on:click="query" type="primary" style="background-color: #004499; border-color: #004499">Draw Line Chart</el-button>
+      <el-button @click="showData" type="primary" style="background-color: #004499; border-color: #004499">View Data</el-button>
     </div>
   </div>
 </template>
@@ -62,10 +45,11 @@
       },
       data() {
         return {
+          totalValue:0,
           pageNumber:0,
           pageSize:50,
           currentPage:1,
-          pickerOptions: {
+          pickerOptions2: {
             shortcuts: [{
               text: '最近30天',
               onClick(picker) {
@@ -92,11 +76,11 @@
               }
             }]
           },
-          value5: [new Date(Date.now()-3600*24*1000*24), new Date(Date.now())],
+          value5: [new Date(Date.now()-3600*24*1000*30), new Date(Date.now())],
           options: {
             chart: {
               width: 1000,
-              height: 400,
+              height: 500,
               zoomType: 'x',
               resetZoomButton: {
                 position: {
@@ -105,10 +89,14 @@
                   x: 0,
                   y: -30
                 },
-                relativeTo: 'chart'
-              }
+                relativeTo: 'chart',
+                animation:false
+              },
+              plotBorderWidth: 2,
+              plotBorderColor: 'grey'
             },
             plotOptions: {
+              animation:false,
               series:{
                 turboThreshold:10000
               },
@@ -122,7 +110,18 @@
               text: 'Integral Current'
             },
             xAxis: {
+              lineWidth:1,
+              gridLineDashStyle:'ShortDash',
+              lineColor:'grey',
+              gridLineWidth: 1,
               ordinal:false,
+              title:{
+                text:'Time',
+                style: {
+                  color:"black",
+                  fontWeight:1000
+                }
+              },
               type: 'datetime',
               dateTimeLabelFormats: {
                 millisecond: '%H:%M:%S.%L',
@@ -131,7 +130,7 @@
                 hour: '%H:%M',
                 day: '%m-%d',
                 week: '%m-%d',
-                month: '%Y-%m',
+                month: '%Y-%m-%d',
                 year: '%Y'
               }
             },
@@ -141,13 +140,15 @@
               showLastLabel:true,
               opposite:false,
               type: 'linear',
+              lineColor:'grey',
               title: {
                 text: 'A*h'
               },
-              lineWidth:1
+              lineWidth:2
             },{
               opposite:true,
-              lineWidth:1
+              lineWidth:2,
+              lineColor:'grey',
             }],
             tooltip: {
               dateTimeLabelFormats: {
@@ -157,14 +158,12 @@
                 hour: '%H:%M',
                 day: '%Y-%m-%d',
                 week: '%m-%d',
-                month: '%Y-%m',
+                month: '%Y-%m-%d',
                 year: '%Y'
               }
             },
             credits: {
-              // enabled:true,    // 默认值，如果想去掉版权信息，设置为false即可
-              text: 'NSRL@USTC', // 显示的文字
-              href: 'http://www.nsrl.ustc.edu.cn'
+              enabled:false,
             },
             rangeSelector: false,
             legend: {
@@ -195,25 +194,16 @@
         let n;
         let date1 = new Date(this.value5[0]);
         let date2 = new Date(this.value5[1]);
-        let time1 = date1.format("yyyy-MM-dd hh:mm:ss");
-        let time2 = date2.format("yyyy-MM-dd hh:mm:ss");
+        let time1 = new Date(date1.format("yyyy-MM-dd") + " 00:00:00").format('yyyy-MM-dd hh:mm:ss')
+        let time2 = new Date(date2.format("yyyy-MM-dd") + " 00:00:00").format('yyyy-MM-dd hh:mm:ss')
         let _this = this
         // console.log('/integral/'+time1+'/'+time2)
         this.$axios.get(this.urlFragment + '/integral/'+time1+'/'+time2).then(function (response){
           n = response.data.length;
           for (var i = 0; i < n; i++){
             p.push([response.data[i].curr_date,response.data[i].val]);
-            q.push({
-              curr_date:(new Date(response.data[i].curr_date)).format("yyyy-MM-dd hh:mm:ss").toString(),
-              val:response.data[i].val
-            })
           }
           _this.options.series[0].data=p;
-          _this.gridData = q;
-          // console.log("n: " + n)
-          _this.pageNumber = Math.ceil(n%_this.pageSize ? n/_this.pageSize : n/_this.pageSize +1);
-          // console.log("gridData:" + _this.gridData);
-          // console.log('pageNumber: '+ _this.pageNumber);
         });
       },
       methods:{
@@ -223,29 +213,43 @@
           let n;
           let date1 = new Date(this.value5[0]);
           let date2 = new Date(this.value5[1]);
-          let time1 = date1.format("yyyy-MM-dd hh:mm:ss");
-          let time2 = date2.format("yyyy-MM-dd hh:mm:ss");
+          let time1 = new Date(date1.format("yyyy-MM-dd") + " 00:00:00").format('yyyy-MM-dd hh:mm:ss')
+          let time2 = new Date(date2.format("yyyy-MM-dd") + " 00:00:00").format('yyyy-MM-dd hh:mm:ss')
           let _this = this
           // console.log('/integral/'+time1+'/'+time2)
           this.$axios.get(this.urlFragment + '/integral/'+time1+'/'+time2).then(function (response){
             n = response.data.length;
             for (var i = 0; i < n; i++){
               p.push([response.data[i].curr_date,response.data[i].val]);
-              q.push({
-                curr_date:(new Date(response.data[i].curr_date)).format("yyyy-MM-dd hh:mm:ss").toString(),
-                val:response.data[i].val
-              })
             }
             _this.options.series[0].data=p;
-            _this.gridData = q;
-            // console.log("n: " + n)
-            _this.pageNumber = Math.ceil(n%_this.pageSize ? n/_this.pageSize : n/_this.pageSize +1);
-            // console.log("gridData:" + _this.gridData);
-            // console.log('pageNumber: '+ _this.pageNumber);
           });
         },
-        pageChange:function (val) {
-          this.currentPage = val;
+        showData:function () {
+         this.dialogTableVisible = true;
+          let p = new Array();
+          let q = new Array();
+          let n;
+          let total = 0;
+          let date1 = new Date(this.value5[0]);
+          let date2 = new Date(this.value5[1]);
+          let time1 = new Date(date1.format("yyyy-MM-dd") + " 00:00:00").format('yyyy-MM-dd hh:mm:ss')
+          let time2 = new Date(date2.format("yyyy-MM-dd") + " 00:00:00").format('yyyy-MM-dd hh:mm:ss')
+          let _this = this
+          this.$axios.get(this.urlFragment + '/integral/'+time1+'/'+time2).then(function (response){
+            n = response.data.length;
+            for (var i = 0; i < n; i++){
+              q.push({
+                curr_date:(new Date(response.data[i].curr_date)).format("yyyy-MM-dd").toString(),
+                val:response.data[i].val.toFixed(6)
+              })
+            }
+            _this.gridData = q;
+            for (var i = 0; i < n; i++){
+              total += response.data[i].val;
+            }
+            _this.totalValue = total.toFixed(6);
+          });
         }
       }
     }
