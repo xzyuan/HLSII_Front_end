@@ -13,7 +13,7 @@
     "axios": "^0.18.0",
     "element-ui": "^2.4.8",
     "file-saver": "^2.0.0-rc.4",
-    "highcharts": "^6.1.4",
+    "highcharts": "^7.2.2",
     "highcharts-vue": "^1.2.0",
     "lib-flexible": "^0.3.2",
     "px2rem-loader": "^0.1.9",
