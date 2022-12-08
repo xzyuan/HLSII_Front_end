@@ -17,7 +17,7 @@
     "highcharts-vue": "^1.2.0",
     "lib-flexible": "^0.3.2",
     "px2rem-loader": "^0.1.9",
-    "qs": "^6.5.2",
+    "qs": "^6.5.3",
     "v-charts": "^1.17.10",
     "vue": "^2.5.2",
     "vue-highcharts": "0.0.10",
